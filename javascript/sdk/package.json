@@ -1,7 +1,7 @@
 {
-  "name": "@forevervm/client",
+  "name": "@forevervm/sdk",
   "version": "0.1.0",
-  "description": "Client library for ForeverVM",
+  "description": "Developer SDK for ForeverVM",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

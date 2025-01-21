@@ -1,5 +1,5 @@
 import { Args, Command } from '@oclif/core'
-import { getClientFromEnv } from '../../config.js'
+import { getSDKFromEnv } from '../../config.js'
 import chalk from 'chalk'
 import { input } from '@inquirer/prompts'
 
@@ -14,9 +14,9 @@ export default class MachineRepl extends Command {
 
   public async run(): Promise<void> {
     const { args } = await this.parse(MachineRepl)
-    const client = getClientFromEnv(this.config.configDir)
+    const sdk = getSDKFromEnv(this.config.configDir)
 
-    const repl = await client.repl(args.machine)
+    const repl = await sdk.repl(args.machine)
     this.log(`Connected to ${chalk.green(args.machine)}!`)
 
     while (true) {

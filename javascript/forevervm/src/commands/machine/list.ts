@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core'
-import { getClientFromEnv } from '../../config.js'
+import { getSDKFromEnv } from '../../config.js'
 import cj from 'color-json'
 
 export default class MachineList extends Command {
@@ -8,9 +8,9 @@ export default class MachineList extends Command {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
-    const client = getClientFromEnv(this.config.configDir)
+    const sdk = getSDKFromEnv(this.config.configDir)
 
-    const machines = await client.listMachines()
+    const machines = await sdk.listMachines()
     this.log(cj(machines))
   }
 }

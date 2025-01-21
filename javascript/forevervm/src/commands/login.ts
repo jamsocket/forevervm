@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { password } from '@inquirer/prompts'
-import { ForeverVMClient } from '@forevervm/client'
+import { ForeverVM } from '@forevervm/sdk'
 import { API_BASE_URL, ConfigManager } from '../config.js'
 import chalk from 'chalk'
 
@@ -22,8 +22,8 @@ export default class Login extends Command {
     if (config) {
       let token = config.token
 
-      const client = new ForeverVMClient(API_BASE_URL, token)
-      let account = await client.whoami()
+      const sdk = new ForeverVM(API_BASE_URL, token)
+      let account = await sdk.whoami()
 
       this.log(
         `Already logged in as ${chalk.green(account.account)}. Use logout to log out first if you would like to change accounts.`,
@@ -36,8 +36,8 @@ export default class Login extends Command {
       mask: '*',
     })
 
-    const client = new ForeverVMClient(API_BASE_URL, token)
-    let account = await client.whoami()
+    const sdk = new ForeverVM(API_BASE_URL, token)
+    let account = await sdk.whoami()
 
     await this.configManager.saveConfig({ token })
     this.log(`Successfully logged in as ${chalk.green(account.account)}`)

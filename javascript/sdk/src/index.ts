@@ -11,7 +11,7 @@ import {
 export * from './types'
 export * from './repl'
 
-export class ForeverVMClient {
+export class ForeverVM {
   constructor(private baseUrl: string, private token: string) {}
 
   private async getRequest(path: string) {

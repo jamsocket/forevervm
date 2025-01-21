@@ -1,6 +1,5 @@
 import { Args, Command, Flags } from '@oclif/core'
-import { getClientFromEnv } from '../../config.js'
-import cj from 'color-json'
+import { getSDKFromEnv } from '../../config.js'
 import chalk from 'chalk'
 
 export default class MachineExec extends Command {
@@ -21,9 +20,9 @@ export default class MachineExec extends Command {
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(MachineExec)
 
-    const client = getClientFromEnv(this.config.configDir)
+    const sdk = getSDKFromEnv(this.config.configDir)
 
-    const response = await client.execMachine(args.code, args.machine, flags.noWait)
+    const response = await sdk.execMachine(args.code, args.machine, flags.noWait)
     if (response.instruction_seq === undefined) {
       this.log(
         'The instruction was not submitted because another instruction is already running or pending.',
@@ -36,7 +35,7 @@ export default class MachineExec extends Command {
     )
 
     if (!flags.noWait) {
-      const result = await client.execResult(args.machine, response.instruction_seq)
+      const result = await sdk.execResult(args.machine, response.instruction_seq)
       if (result.result.value !== undefined) {
         this.log(`Result: ${chalk.magenta(result.result.value)}`)
       } else {
