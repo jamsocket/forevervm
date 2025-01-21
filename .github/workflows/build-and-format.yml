@@ -1,0 +1,43 @@
+name: Build and Format Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-format:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: javascript
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: javascript/package-lock.json
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Format
+      run: npm run format
+      
+    - name: Check for uncommitted changes
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "There are uncommitted changes after formatting. Please run 'npm run format' locally and commit the changes."
+          git status
+          git diff
+          exit 1
+        fi
