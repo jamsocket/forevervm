@@ -82,17 +82,17 @@ export class ForeverVMClient {
   }
 
   async whoami(): Promise<WhoamiResponse> {
-    const response = await this.getRequest('/whoami')
+    const response = await this.getRequest('/v1/whoami')
     return response
   }
 
   async createMachine(): Promise<CreateMachineResponse> {
-    const response = await this.postRequest('/machine/new')
+    const response = await this.postRequest('/v1/machine/new')
     return response
   }
 
   async listMachines(): Promise<ListMachinesResponse> {
-    const response = await this.getRequest('/machine/list')
+    const response = await this.getRequest('/v1/machine/list')
     return response
   }
 
@@ -101,7 +101,7 @@ export class ForeverVMClient {
     machineName?: string,
     interrupt: boolean = false,
   ): Promise<ApiExecResponse> {
-    const response = await this.postRequest(`/machine/${machineName}/exec`, {
+    const response = await this.postRequest(`/v1/machine/${machineName}/exec`, {
       instruction: { code },
       interrupt,
     })
@@ -109,7 +109,9 @@ export class ForeverVMClient {
   }
 
   async execResult(machineName: string, instructionSeq: number): Promise<ApiExecResponseResult> {
-    const response = await this.getRequest(`/machine/${machineName}/exec/${instructionSeq}/result`)
+    const response = await this.getRequest(
+      `/v1/machine/${machineName}/exec/${instructionSeq}/result`,
+    )
     return response
   }
 }
