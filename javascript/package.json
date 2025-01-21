@@ -1,0 +1,8 @@
+{
+  "name": "@forevervm/monorepo",
+  "private": true,
+  "workspaces": [
+    "sdk",
+    "forevervm"
+  ]
+}
