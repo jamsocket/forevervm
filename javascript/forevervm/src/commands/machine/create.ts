@@ -1,5 +1,5 @@
 import { Command, Flags } from '@oclif/core'
-import { getClientFromEnv } from '../../config.js'
+import { getSDKFromEnv } from '../../config.js'
 import chalk from 'chalk'
 
 export default class MachineCreate extends Command {
@@ -8,9 +8,9 @@ export default class MachineCreate extends Command {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
-    const client = getClientFromEnv(this.config.configDir)
+    const sdk = getSDKFromEnv(this.config.configDir)
 
-    const response = await client.createMachine()
+    const response = await sdk.createMachine()
     this.log(`Created machine: ${chalk.green(response.machine_name)}`)
   }
 }

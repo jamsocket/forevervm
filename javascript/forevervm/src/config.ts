@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { ForeverVMClient } from '@forevervm/client'
+import { ForeverVM } from '@forevervm/sdk'
 
 export interface CliConfig {
   token: string
@@ -33,7 +33,7 @@ export class ConfigManager {
 
 export const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:8080'
 
-export function getClientFromEnv(configDir: string): ForeverVMClient {
+export function getSDKFromEnv(configDir: string): ForeverVM {
   const configManager = new ConfigManager(configDir)
   const config = configManager.loadConfig()
 
@@ -41,5 +41,5 @@ export function getClientFromEnv(configDir: string): ForeverVMClient {
     throw new Error('Use "forevervm login" to login first.')
   }
 
-  return new ForeverVMClient(API_BASE_URL, config.token)
+  return new ForeverVM(API_BASE_URL, config.token)
 }
