@@ -12,7 +12,7 @@
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
-    "@forevervm/sdk": "^0.0.1",
+    "@forevervm/sdk": "workspace:*",
     "chalk": "^5.4.1",
     "color-json": "^3.0.5",
     "prettier": "^3.4.2"
