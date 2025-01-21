@@ -1,0 +1,12 @@
+{
+  "name": "@forevervm/monorepo",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "format": "npm run format --workspaces"
+  },
+  "workspaces": [
+    "sdk",
+    "forevervm"
+  ]
+}

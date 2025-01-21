@@ -1,7 +1,7 @@
 {
   "name": "forevervm",
   "description": "CLI for foreverVM",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Jamsocket",
   "bin": {
     "forevervm": "./bin/run.js"
@@ -12,7 +12,7 @@
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
-    "@forevervm/sdk": "file:../sdk",
+    "@forevervm/sdk": "*",
     "chalk": "^5.4.1",
     "color-json": "^3.0.5",
     "prettier": "^3.4.2"
