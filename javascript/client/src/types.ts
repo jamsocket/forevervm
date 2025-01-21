@@ -33,13 +33,15 @@ export interface ApiExecResponse {
   interrupted: boolean
 }
 
+export interface ExecResponse {
+  value?: string | null
+  error?: string
+  runtime_ms: number
+}
+
 export interface ApiExecResponseResult {
   instruction_seq: number
-  result: {
-    value?: string | null
-    error?: string
-    runtime_ms: number
-  }
+  result: ExecResponse
   value?: string | null
   error?: string
   runtime_ms: number

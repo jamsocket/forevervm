@@ -1,4 +1,4 @@
-import { Args, Command, Flags } from '@oclif/core'
+import { Args, Command } from '@oclif/core'
 import { getClientFromEnv } from '../../config.js'
 import chalk from 'chalk'
 import { input } from '@inquirer/prompts'
@@ -13,7 +13,7 @@ export default class MachineRepl extends Command {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
-    const { args, flags } = await this.parse(MachineRepl)
+    const { args } = await this.parse(MachineRepl)
     const client = getClientFromEnv(this.config.configDir)
 
     const repl = await client.repl(args.machine)
@@ -25,7 +25,6 @@ export default class MachineRepl extends Command {
       })
 
       if (code === '') {
-        this.log('Goodbye!')
         return
       }
 
@@ -33,15 +32,14 @@ export default class MachineRepl extends Command {
 
       while (true) {
         let output = await execResult.nextOutput()
-        if (output === undefined) break
-        this.log(`  ${output}`)
+        if (output === null) break
       }
 
       const result = await execResult.result()
-      if (result.result.value !== undefined) {
-        this.log(`${chalk.magenta(result.result.value)}`)
-      } else if (result.result.error !== undefined) {
-        this.log(`${chalk.red(result.result.error)}`)
+      if (result.value !== undefined) {
+        this.log(`${chalk.magenta(result.value)}`)
+      } else if (result.error !== undefined) {
+        this.log(`${chalk.red(result.error)}`)
       } else {
         this.log(`${chalk.red(result)}`)
       }

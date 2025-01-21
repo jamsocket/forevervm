@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { ApiExecResponseResult } from './types'
+import { ExecResponse } from './types'
 
 export interface Instruction {
   code: string
@@ -27,7 +27,7 @@ export type MessageFromServer =
   | {
       type: 'result'
       instruction_id: number
-      result: ApiExecResponseResult
+      result: ExecResponse
     }
   | {
       type: 'output'
@@ -46,8 +46,8 @@ type ConnectionState =
     }
   | {
       type: 'waiting_for_result'
-      result_callback: (result: ApiExecResponseResult) => void
-      output_callback: (output: StandardOutput) => void
+      resultCallback: (result: ExecResponse) => void
+      outputCallback: (output: StandardOutput) => void
       instruction_id: number
     }
 
@@ -65,7 +65,6 @@ export class ReplClient {
   }
 
   private recv(message: MessageFromServer) {
-    console.log('recv', message)
     if (message.type === 'exec_received') {
       if (this.state.type === 'waiting_for_instruction_seq') {
         if (message.request_id === this.state.request_id) {
@@ -80,7 +79,7 @@ export class ReplClient {
     } else if (message.type === 'result') {
       if (this.state.type === 'waiting_for_result') {
         if (message.instruction_id === this.state.instruction_id) {
-          this.state.result_callback(message.result)
+          this.state.resultCallback(message.result)
           this.state = { type: 'idle' }
         } else {
           console.warn('Unexpected instruction id', this.state, 'with message', message)
@@ -91,7 +90,7 @@ export class ReplClient {
     } else if (message.type === 'output') {
       if (this.state.type === 'waiting_for_result') {
         if (message.instruction_id === this.state.instruction_id) {
-          this.state.output_callback(message.output)
+          this.state.outputCallback(message.output)
         } else {
           console.warn('Unexpected instruction id', this.state, 'with message', message)
         }
@@ -124,8 +123,8 @@ export class ReplClient {
     this.state = {
       type: 'waiting_for_result',
       instruction_id: instructionSeq,
-      result_callback: (execResult) => result.setResult(execResult),
-      output_callback: (output) => result.addOutput(output),
+      resultCallback: (execResult) => result.setResult(execResult),
+      outputCallback: (output) => result.addOutput(output),
     }
     return result
   }
@@ -133,16 +132,16 @@ export class ReplClient {
 
 export class ReplExecResult {
   private instruction_id: number
-  private resultPromise: Promise<ApiExecResponseResult>
+  private resultPromise: Promise<ExecResponse>
   private output: StandardOutput[] = []
   private outputResolver?: () => void
   private outputPromise: Promise<void>
-  private resultResolver?: (result: ApiExecResponseResult) => void
+  private resultResolver?: (result: ExecResponse) => void
 
   constructor(instruction_id: number) {
     this.instruction_id = instruction_id
 
-    this.resultPromise = new Promise<ApiExecResponseResult>((resolve) => {
+    this.resultPromise = new Promise<ExecResponse>((resolve) => {
       this.resultResolver = resolve
     })
 
@@ -160,7 +159,7 @@ export class ReplExecResult {
     })
   }
 
-  setResult(result: ApiExecResponseResult) {
+  setResult(result: ExecResponse) {
     if (this.resultResolver) {
       this.resultResolver(result)
     }
@@ -180,18 +179,17 @@ export class ReplExecResult {
     if (this.output.length > 0) {
       return this.output.shift()!
     }
-    const result = await Promise.race([
-      this.resultPromise.then(() => null),
-      this.outputPromise.then(() => this.output.shift()!),
-    ])
-    if (result === null) {
-      return null
+
+    await Promise.any([this.outputPromise, this.resultPromise])
+
+    if (this.output.length > 0) {
+      return this.output.shift()!
     }
-    this.setOutputPromise()
-    return result
+
+    return null
   }
 
-  async result(): Promise<ApiExecResponseResult> {
+  async result(): Promise<ExecResponse> {
     return await this.resultPromise
   }
 }
