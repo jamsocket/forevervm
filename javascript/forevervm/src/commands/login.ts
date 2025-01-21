@@ -22,7 +22,7 @@ export default class Login extends Command {
     if (config) {
       let token = config.token
 
-      const sdk = new ForeverVM(API_BASE_URL, token)
+      const sdk = new ForeverVM(token, { baseUrl: API_BASE_URL })
       let account = await sdk.whoami()
 
       this.log(
@@ -36,7 +36,7 @@ export default class Login extends Command {
       mask: '*',
     })
 
-    const sdk = new ForeverVM(API_BASE_URL, token)
+    const sdk = new ForeverVM(token, { baseUrl: API_BASE_URL })
     let account = await sdk.whoami()
 
     await this.configManager.saveConfig({ token })

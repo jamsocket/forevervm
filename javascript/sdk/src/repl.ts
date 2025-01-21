@@ -1,4 +1,3 @@
-import { WebSocket } from 'ws'
 import { ExecResponse } from './types'
 
 export interface Instruction {
@@ -58,7 +57,7 @@ export class ReplClient {
 
   constructor(ws: WebSocket) {
     this.ws = ws
-    this.ws.on('message', (data) => {
+    this.ws.addEventListener('message', ({ data }) => {
       const message = JSON.parse(data.toString()) as MessageFromServer
       this.recv(message)
     })
