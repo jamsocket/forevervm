@@ -41,5 +41,5 @@ export function getSDKFromEnv(configDir: string): ForeverVM {
     throw new Error('Use "forevervm login" to login first.')
   }
 
-  return new ForeverVM(API_BASE_URL, config.token)
+  return new ForeverVM(config.token, { baseUrl: API_BASE_URL })
 }

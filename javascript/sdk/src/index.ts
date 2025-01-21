@@ -11,8 +11,16 @@ import {
 export * from './types'
 export * from './repl'
 
+interface ForeverVMOptions {
+  baseUrl?: string
+}
+
 export class ForeverVM {
-  constructor(private baseUrl: string, private token: string) {}
+  baseUrl = 'https://api-stg.forevervm.com'
+
+  constructor(private token: string, options: ForeverVMOptions = {}) {
+    if (options.baseUrl) this.baseUrl = options.baseUrl
+  }
 
   private async getRequest(path: string) {
     const response = await fetch(`${this.baseUrl}${path}`, {
