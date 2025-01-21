@@ -30,7 +30,7 @@ export type MessageFromServer =
     }
   | {
       type: 'output'
-      output: StandardOutput
+      chunk: StandardOutput
       instruction_id: number
     }
 
@@ -89,7 +89,7 @@ export class ReplClient {
     } else if (message.type === 'output') {
       if (this.state.type === 'waiting_for_result') {
         if (message.instruction_id === this.state.instruction_id) {
-          this.state.outputCallback(message.output)
+          this.state.outputCallback(message.chunk)
         } else {
           console.warn('Unexpected instruction id', this.state, 'with message', message)
         }
@@ -176,13 +176,13 @@ export class ReplExecResult {
 
   async nextOutput(): Promise<StandardOutput | null> {
     if (this.output.length > 0) {
-      return this.output.shift()!
+      return this.output.shift() ?? null
     }
 
     await Promise.any([this.outputPromise, this.resultPromise])
 
     if (this.output.length > 0) {
-      return this.output.shift()!
+      return this.output.shift() ?? null
     }
 
     return null

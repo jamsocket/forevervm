@@ -33,6 +33,7 @@ export default class MachineRepl extends Command {
       while (true) {
         let output = await execResult.nextOutput()
         if (output === null) break
+        this.log(output.data)
       }
 
       const result = await execResult.result()
