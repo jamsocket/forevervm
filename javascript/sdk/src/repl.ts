@@ -70,37 +70,51 @@ export class ReplClient {
   }
 
   private recv(message: MessageFromServer) {
-    if (message.type === 'exec_received') {
-      if (this.state.type === 'waiting_for_instruction_seq') {
-        if (message.request_id === this.state.request_id) {
-          this.state.callback(message.seq)
-          this.state = { type: 'idle' }
-        } else {
+    switch (message.type) {
+      case 'exec_received': {
+        if (this.state.type !== 'waiting_for_instruction_seq') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
+        }
+
+        if (message.request_id !== this.state.request_id) {
           console.warn('Unexpected request id', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        this.state.callback(message.seq)
+        break
       }
-    } else if (message.type === 'result') {
-      if (this.state.type === 'waiting_for_result') {
-        if (message.instruction_id === this.state.instruction_id) {
-          this.state.resultCallback(message.result)
-          this.state = { type: 'idle' }
-        } else {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
+
+      case 'output': {
+        if (this.state.type !== 'waiting_for_result') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        if (message.instruction_id !== this.state.instruction_id) {
+          console.warn('Unexpected instruction id', this.state, 'with message', message)
+          return
+        }
+
+        this.state.outputCallback(message.chunk)
+        break
       }
-    } else if (message.type === 'output') {
-      if (this.state.type === 'waiting_for_result') {
-        if (message.instruction_id === this.state.instruction_id) {
-          this.state.outputCallback(message.chunk)
-        } else {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
+
+      case 'result': {
+        if (this.state.type !== 'waiting_for_result') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        if (message.instruction_id !== this.state.instruction_id) {
+          console.warn('Unexpected instruction id', this.state, 'with message', message)
+          return
+        }
+
+        this.state.resultCallback(message.result)
+        this.state = { type: 'idle' }
+        break
       }
     }
   }
