@@ -1,4 +1,3 @@
-import { WebSocket } from 'ws'
 import { ReplClient } from './repl'
 import {
   ApiExecResponse,
@@ -87,18 +86,14 @@ export class ForeverVM {
     return new Promise<ReplClient>((resolve, reject) => {
       const ws = new WebSocket(
         `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName}/repl`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${this.token}` } } as any,
       )
 
-      ws.on('open', () => {
+      ws.addEventListener('open', () => {
         resolve(new ReplClient(ws))
       })
 
-      ws.on('error', (error) => {
+      ws.addEventListener('error', (error) => {
         reject(error)
       })
     })
