@@ -1,0 +1,33 @@
+{
+  "name": "@forevervm/client",
+  "version": "0.1.0",
+  "description": "Client library for ForeverVM",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha -r ts-node/register 'test/**/*.test.ts'",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "author": "Jamsocket",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "mocha": "^10.0.0",
+    "prettier": "^2.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0"
+  },
+  "dependencies": {
+    "@types/ws": "^8.5.13",
+    "ws": "^8.18.0"
+  }
+}

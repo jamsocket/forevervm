@@ -18,13 +18,13 @@ export interface ListMachinesResponse {
   machines: Machine[]
 }
 
-export interface Instruction {
+export interface ApiExecRequest {
+  instruction: {
+    code: string
+    max_duration_seconds?: number
+  }
   code: string
   max_duration_seconds?: number
-}
-
-export interface ApiExecRequest {
-  instruction: Instruction
   interrupt: boolean
 }
 
@@ -34,10 +34,13 @@ export interface ApiExecResponse {
 }
 
 export interface ApiExecResponseResult {
-  instruction_id: number
+  instruction_seq: number
   result: {
     value?: string | null
     error?: string
     runtime_ms: number
   }
+  value?: string | null
+  error?: string
+  runtime_ms: number
 }
