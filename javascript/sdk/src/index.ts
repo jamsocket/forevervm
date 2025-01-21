@@ -72,7 +72,7 @@ export class ForeverVM {
   }
 
   async execResult(machineName: string, instructionSeq: number): Promise<ApiExecResponseResult> {
-    return await this.getRequest(`/v1/machine/${machineName}/exec/${instructionSeq}`)
+    return await this.getRequest(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
   }
 
   async repl(machineName: string): Promise<ReplClient> {
