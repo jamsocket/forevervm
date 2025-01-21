@@ -1,6 +1,5 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { promisify } from 'util'
 import { ForeverVMClient } from './client/index.js'
 
 export interface CliConfig {

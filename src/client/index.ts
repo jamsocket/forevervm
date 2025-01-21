@@ -1,3 +1,6 @@
+import { ReplClient } from './repl.js'
+import { WebSocket } from 'ws'
+
 export interface WhoamiResponse {
   account: string
 }
@@ -113,5 +116,23 @@ export class ForeverVMClient {
       `/v1/machine/${machineName}/exec/${instructionSeq}/result`,
     )
     return response
+  }
+
+  async repl(machineName: string): Promise<ReplClient> {
+    let url = new URL(this.baseUrl)
+    if (url.protocol === 'http:') {
+      url.protocol = 'ws:'
+    } else {
+      url.protocol = 'wss:'
+    }
+    url.pathname = `/v1/machine/${machineName}/repl`
+
+    const ws = new WebSocket(url.href, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    })
+
+    return new ReplClient(ws)
   }
 }
