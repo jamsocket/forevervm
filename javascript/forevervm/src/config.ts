@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { ForeverVMClient } from './client/index.js'
+import { ForeverVMClient } from '@forevervm/client'
 
 export interface CliConfig {
   token: string

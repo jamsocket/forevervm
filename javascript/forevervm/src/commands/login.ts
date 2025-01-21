@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { password } from '@inquirer/prompts'
-import { ForeverVMClient } from '../client/index.js'
+import { ForeverVMClient } from '@forevervm/client'
 import { API_BASE_URL, ConfigManager } from '../config.js'
 import chalk from 'chalk'
 
