@@ -1,5 +1,5 @@
 import { ReplClient } from './repl'
-import {
+import type {
   ApiExecResponse,
   ApiExecResponseResult,
   CreateMachineResponse,
