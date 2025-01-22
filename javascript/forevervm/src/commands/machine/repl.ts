@@ -36,15 +36,13 @@ export default class MachineRepl extends Command {
         continue
       }
 
-      const execResult = await repl.exec(code)
+      const execResult = repl.exec(code)
 
-      while (true) {
-        let output = await execResult.nextOutput()
-        if (output === null) break
-        this.log(chalk.redBright(output.stream), chalk.yellowBright(output.data))
+      for await (const log of execResult.output) {
+        this.log(chalk.redBright(log.stream), chalk.yellowBright(log.data))
       }
 
-      const result = await execResult.result()
+      const result = await execResult.result
       if (result.value !== undefined) {
         this.log(`${chalk.magenta(result.value)}`)
       } else if (result.error !== undefined) {
