@@ -1,3 +1,4 @@
+import { Stream } from './stream'
 import { ExecResponse } from './types'
 
 export interface Instruction {
@@ -30,7 +31,7 @@ export type MessageFromServer =
     }
   | {
       type: 'output'
-      output: StandardOutput
+      chunk: StandardOutput
       instruction_id: number
     }
 
@@ -89,7 +90,7 @@ export class ReplClient {
     } else if (message.type === 'output') {
       if (this.state.type === 'waiting_for_result') {
         if (message.instruction_id === this.state.instruction_id) {
-          this.state.outputCallback(message.output)
+          this.state.outputCallback(message.chunk)
         } else {
           console.warn('Unexpected instruction id', this.state, 'with message', message)
         }
@@ -118,7 +119,7 @@ export class ReplClient {
       })
     })
 
-    const result = new ReplExecResult(instructionSeq)
+    const result = new ReplExecResult()
     this.state = {
       type: 'waiting_for_result',
       instruction_id: instructionSeq,
@@ -130,31 +131,13 @@ export class ReplClient {
 }
 
 export class ReplExecResult {
-  private instruction_id: number
   private resultPromise: Promise<ExecResponse>
-  private output: StandardOutput[] = []
-  private outputResolver?: () => void
-  private outputPromise: Promise<void>
+  private output: Stream<StandardOutput> = new Stream()
   private resultResolver?: (result: ExecResponse) => void
 
-  constructor(instruction_id: number) {
-    this.instruction_id = instruction_id
-
+  constructor() {
     this.resultPromise = new Promise<ExecResponse>((resolve) => {
       this.resultResolver = resolve
-    })
-
-    this.outputPromise = new Promise<void>((resolve) => {
-      this.outputResolver = resolve
-    })
-  }
-
-  setOutputPromise() {
-    if (this.outputResolver) {
-      this.outputResolver()
-    }
-    this.outputPromise = new Promise<void>((resolve) => {
-      this.outputResolver = resolve
     })
   }
 
@@ -162,30 +145,17 @@ export class ReplExecResult {
     if (this.resultResolver) {
       this.resultResolver(result)
     }
-    if (this.outputResolver) {
-      this.outputResolver()
+    if (this.output) {
+      this.output.close()
     }
   }
 
   addOutput(output: StandardOutput) {
     this.output.push(output)
-    if (this.outputResolver) {
-      this.outputResolver()
-    }
   }
 
   async nextOutput(): Promise<StandardOutput | null> {
-    if (this.output.length > 0) {
-      return this.output.shift()!
-    }
-
-    await Promise.any([this.outputPromise, this.resultPromise])
-
-    if (this.output.length > 0) {
-      return this.output.shift()!
-    }
-
-    return null
+    return await this.output.next()
   }
 
   async result(): Promise<ExecResponse> {
