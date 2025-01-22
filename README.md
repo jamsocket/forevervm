@@ -1,6 +1,14 @@
 foreverVM
 =========
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/forevervm?style=social)](https://github.com/jamsocket/forevervm)
+[![Chat on Discord](https://img.shields.io/discord/939641163265232947?color=404eed&label=discord)](https://discord.gg/N5sEpsuhh9)
+
+| repo                                                | version                     |
+|-----------------------------------------------------|-----------------------------|
+| [cli](https://github.com/jamsocket/forevervm) | [![npm](https://img.shields.io/npm/v/forevervm)](https://www.npmjs.com/package/forevervm) |
+| [sdk](https://github.com/jamsocket/forevervm) | [![npm](https://img.shields.io/npm/v/@forevervm/sdk)](https://www.npmjs.com/package/@forevervm/sdk) |
+
 foreverVM provides an API for running arbitrary, stateful Python code securely.
 
 The core concepts in foreverVM are **machines** and **instructions**.
