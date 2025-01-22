@@ -6,6 +6,7 @@ import {
   ListMachinesResponse,
   WhoamiResponse,
 } from './types'
+import WebSocket from './ws'
 
 export * from './types'
 export * from './repl'
@@ -93,9 +94,7 @@ export class ForeverVM {
         resolve(new ReplClient(ws))
       })
 
-      ws.addEventListener('error', (error) => {
-        reject(error)
-      })
+      ws.addEventListener('error', reject)
     })
   }
 }
