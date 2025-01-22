@@ -8,11 +8,11 @@
   },
   "bugs": "https://github.com/jamsocket/forevervm/issues",
   "dependencies": {
+    "@forevervm/sdk": "*",
     "@inquirer/prompts": "^7.2.3",
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
-    "@forevervm/sdk": "*",
     "chalk": "^5.4.1",
     "color-json": "^3.0.5",
     "prettier": "^3.4.2"
@@ -31,8 +31,7 @@
     "mocha": "^10",
     "oclif": "^4",
     "shx": "^0.3.3",
-    "ts-node": "^10",
-    "typescript": "^5"
+    "ts-node": "^10"
   },
   "engines": {
     "node": ">=18.0.0"

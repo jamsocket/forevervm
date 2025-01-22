@@ -11,5 +11,8 @@
   "workspaces": [
     "sdk",
     "forevervm"
-  ]
+  ],
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
 }
