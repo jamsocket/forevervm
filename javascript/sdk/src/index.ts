@@ -82,10 +82,10 @@ export class ForeverVM {
     return await this.getRequest(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
   }
 
-  async repl(machineName: string): Promise<ReplClient> {
+  async repl(machineName: string | null): Promise<ReplClient> {
     return new Promise<ReplClient>((resolve, reject) => {
       const ws = new WebSocket(
-        `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName}/repl`,
+        `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName ?? 'new'}/repl`,
         { headers: { Authorization: `Bearer ${this.token}` } } as any,
       )
 
