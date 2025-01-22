@@ -67,23 +67,31 @@ export class ReplClient {
 
     this.send({ type: 'exec', instruction, request_id })
     this.listener = new EventTarget()
-    return new ReplExecResult(this.listener)
+    return new ReplExecResult(request_id, this.listener)
   }
 }
 
 export class ReplExecResult {
+  #requestId: number
   #listener: EventTarget
+
+  // instruction state
+  #instructionId: number | undefined
+
+  // stdout/stderr state
+  #buffer: StandardOutput[] = []
+  #advance: (() => void) | undefined = undefined
+
+  // result state
   #done = false
   #resolve: (response: ExecResponse) => void
   #reject: (reason: any) => void
 
-  #buffer: StandardOutput[] = []
-  #advance: (() => void) | undefined = undefined
-
   result: Promise<ExecResponse>
   output: AsyncIterable<StandardOutput, undefined>
 
-  constructor(listener: EventTarget) {
+  constructor(requestId: number, listener: EventTarget) {
+    this.#requestId = requestId
     this.#listener = listener
     this.#listener.addEventListener('exec_received', this)
     this.#listener.addEventListener('output', this)
@@ -120,20 +128,36 @@ export class ReplExecResult {
   }
 
   handleEvent(event: CustomEvent) {
-    const detail = event.detail as MessageFromServer
-    switch (detail.type) {
+    const msg = event.detail as MessageFromServer
+    switch (msg.type) {
       case 'exec_received':
+        if (msg.request_id !== this.#requestId) {
+          console.warn(`Expected request ID ${this.#requestId} with message`, msg)
+          break
+        }
+
+        this.#instructionId = msg.seq
         break
 
       case 'output':
-        this.#buffer.push(detail.chunk)
+        if (msg.instruction_id !== this.#instructionId) {
+          console.warn(`Expected instruction ID ${this.#instructionId} with message`, msg)
+          break
+        }
+
+        this.#buffer.push(msg.chunk)
         this.#flush()
         break
 
       case 'result':
+        if (msg.instruction_id !== this.#instructionId) {
+          console.warn(`Expected instruction ID ${this.#instructionId} with message`, msg)
+          break
+        }
+
         this.#done = true
         this.#flush()
-        this.#resolve(detail.result)
+        this.#resolve(msg.result)
         break
     }
   }
