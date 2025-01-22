@@ -1,6 +1,7 @@
 {
   "name": "forevervm-python-repl-example",
   "version": "1.0.0",
+  "private": true,
   "description": "Example of using foreverVM to run Python REPL commands",
   "type": "module",
   "scripts": {
