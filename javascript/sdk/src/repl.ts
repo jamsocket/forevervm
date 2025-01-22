@@ -1,3 +1,4 @@
+import { Stream } from './stream'
 import { ExecResponse } from './types'
 
 export interface Instruction {
@@ -19,36 +20,36 @@ export type StandardOutput = {
 
 export type MessageFromServer =
   | {
-      type: 'exec_received'
-      seq: number // TODO: rename to instruction_id
-      request_id: number
-    }
+    type: 'exec_received'
+    seq: number // TODO: rename to instruction_id
+    request_id: number
+  }
   | {
-      type: 'result'
-      instruction_id: number
-      result: ExecResponse
-    }
+    type: 'result'
+    instruction_id: number
+    result: ExecResponse
+  }
   | {
-      type: 'output'
-      chunk: StandardOutput
-      instruction_id: number
-    }
+    type: 'output'
+    chunk: StandardOutput
+    instruction_id: number
+  }
 
 type ConnectionState =
   | {
-      type: 'idle'
-    }
+    type: 'idle'
+  }
   | {
-      type: 'waiting_for_instruction_seq'
-      request_id: number
-      callback: (instruction_seq: number) => void
-    }
+    type: 'waiting_for_instruction_seq'
+    request_id: number
+    callback: (instruction_seq: number) => void
+  }
   | {
-      type: 'waiting_for_result'
-      resultCallback: (result: ExecResponse) => void
-      outputCallback: (output: StandardOutput) => void
-      instruction_id: number
-    }
+    type: 'waiting_for_result'
+    resultCallback: (result: ExecResponse) => void
+    outputCallback: (output: StandardOutput) => void
+    instruction_id: number
+  }
 
 export class ReplClient {
   private ws: WebSocket
@@ -64,6 +65,7 @@ export class ReplClient {
   }
 
   private recv(message: MessageFromServer) {
+    console.log('RECV', message)
     if (message.type === 'exec_received') {
       if (this.state.type === 'waiting_for_instruction_seq') {
         if (message.request_id === this.state.request_id) {
@@ -118,7 +120,7 @@ export class ReplClient {
       })
     })
 
-    const result = new ReplExecResult(instructionSeq)
+    const result = new ReplExecResult()
     this.state = {
       type: 'waiting_for_result',
       instruction_id: instructionSeq,
@@ -130,31 +132,13 @@ export class ReplClient {
 }
 
 export class ReplExecResult {
-  private instruction_id: number
   private resultPromise: Promise<ExecResponse>
-  private output: StandardOutput[] = []
-  private outputResolver?: () => void
-  private outputPromise: Promise<void>
+  private output: Stream<StandardOutput> = new Stream()
   private resultResolver?: (result: ExecResponse) => void
 
-  constructor(instruction_id: number) {
-    this.instruction_id = instruction_id
-
+  constructor() {
     this.resultPromise = new Promise<ExecResponse>((resolve) => {
       this.resultResolver = resolve
-    })
-
-    this.outputPromise = new Promise<void>((resolve) => {
-      this.outputResolver = resolve
-    })
-  }
-
-  setOutputPromise() {
-    if (this.outputResolver) {
-      this.outputResolver()
-    }
-    this.outputPromise = new Promise<void>((resolve) => {
-      this.outputResolver = resolve
     })
   }
 
@@ -162,30 +146,17 @@ export class ReplExecResult {
     if (this.resultResolver) {
       this.resultResolver(result)
     }
-    if (this.outputResolver) {
-      this.outputResolver()
+    if (this.output) {
+      this.output.close()
     }
   }
 
   addOutput(output: StandardOutput) {
     this.output.push(output)
-    if (this.outputResolver) {
-      this.outputResolver()
-    }
   }
 
   async nextOutput(): Promise<StandardOutput | null> {
-    if (this.output.length > 0) {
-      return this.output.shift() ?? null
-    }
-
-    await Promise.any([this.outputPromise, this.resultPromise])
-
-    if (this.output.length > 0) {
-      return this.output.shift() ?? null
-    }
-
-    return null
+    return await this.output.next()
   }
 
   async result(): Promise<ExecResponse> {

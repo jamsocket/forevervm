@@ -24,8 +24,8 @@ export default class MachineRepl extends Command {
         message: '>>> ',
       })
 
-      if (code === '') {
-        return
+      if (code.trim() === '') {
+        continue
       }
 
       const execResult = await repl.exec({ code })
@@ -33,7 +33,7 @@ export default class MachineRepl extends Command {
       while (true) {
         let output = await execResult.nextOutput()
         if (output === null) break
-        this.log(output.data)
+        this.log(chalk.redBright(output.stream), chalk.yellowBright(output.data))
       }
 
       const result = await execResult.result()
