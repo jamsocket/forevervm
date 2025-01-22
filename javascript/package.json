@@ -4,7 +4,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "format": "npm run format --workspaces",
-    "publish": "npm publish --workspaces"
+    "publish": "npm publish --workspaces",
+    "version": "npm version --workspaces"
   },
   "workspaces": [
     "sdk",
