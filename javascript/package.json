@@ -4,6 +4,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "format": "npm run format --workspaces",
+    "check-format": "npm run check-format --workspaces",
     "publish": "npm publish --workspaces",
     "version": "npm version --workspaces"
   },

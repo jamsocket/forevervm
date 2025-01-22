@@ -72,7 +72,8 @@
     "posttest": "npm run lint",
     "prepack": "oclif manifest && oclif readme",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "format": "prettier --write .",
+    "format": "prettier --write . ",
+    "check-format": "prettier --check src/**/*.ts",
     "version": "oclif readme && git add README.md"
   },
   "types": "dist/index.d.ts"
