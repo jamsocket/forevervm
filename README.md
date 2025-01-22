@@ -1,4 +1,4 @@
-ForeverVM
+foreverVM
 =========
 
 foreverVM provides an API for running arbitrary, stateful Python code securely.
