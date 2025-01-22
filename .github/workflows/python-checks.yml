@@ -1,13 +1,11 @@
 name: Python Checks
 
 on:
-  push:
-    paths:
-      - 'python/**'
   pull_request:
     paths:
       - 'python/**'
-
+      - '.github/workflows/python-checks.yml'
+  
 jobs:
   lint:
     runs-on: ubuntu-latest
