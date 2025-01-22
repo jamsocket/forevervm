@@ -5,8 +5,10 @@ import chalk from 'chalk'
 import { getSDKFromEnv } from '../../config.js'
 
 export default class MachineRepl extends Command {
+  static aliases = ['repl']
+
   static override args = {
-    machine: Args.string({ description: 'machine to connect to', required: true }),
+    machine: Args.string({ description: 'machine to connect to' }),
   }
 
   static override description = 'connect to a machine and start a REPL'
@@ -17,8 +19,13 @@ export default class MachineRepl extends Command {
     const { args } = await this.parse(MachineRepl)
     const sdk = getSDKFromEnv(this.config.configDir)
 
-    const repl = await sdk.repl(args.machine)
-    this.log(`Connected to ${chalk.green(args.machine)}!`)
+    const repl = await sdk.repl(args.machine ?? null)
+
+    if (args.machine) {
+      this.log(`Connected to ${chalk.green(args.machine)}!`)
+    } else {
+      this.log('Connected to new machine!')
+    }
 
     while (true) {
       const code = await input({
