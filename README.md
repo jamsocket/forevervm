@@ -38,8 +38,8 @@ You can list your machines (in reverse order of creation) like this:
 npx forevervm machine list
 ```
 
-You don't need to terminate machines -- ForeverVM will automatically swap them from memory to disk when they are idle, and then
-automatically swap them back when needed. This is what allows ForeverVM to run repls “forever”.
+You don't need to terminate machines -- foreverVM will automatically swap them from memory to disk when they are idle, and then
+automatically swap them back when needed. This is what allows foreverVM to run repls “forever”.
 
 Using the API
 -------------
