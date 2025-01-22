@@ -1,7 +1,7 @@
 {
   "name": "forevervm",
   "description": "CLI for foreverVM",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "author": "Jamsocket",
   "bin": {
     "forevervm": "./bin/run.js"
@@ -46,6 +46,7 @@
     "oclif"
   ],
   "license": "MIT",
+  "type": "module",
   "main": "dist/index.js",
   "oclif": {
     "bin": "forevervm",
