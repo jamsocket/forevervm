@@ -39,6 +39,11 @@ export type MessageFromServer =
       chunk: StandardOutput
       instruction_id: number
     }
+  | {
+      type: 'error'
+      code: string
+      id: string
+    }
 
 export class ReplClient {
   private ws: WebSocket
@@ -157,6 +162,9 @@ export class ReplExecResult {
         this.#flush()
         this.#resolve(msg.result)
         break
+
+      case 'error':
+        this.#reject(new Error(msg.code))
     }
   }
 }
