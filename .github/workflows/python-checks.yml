@@ -14,10 +14,6 @@ jobs:
       
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-   
-      - name: Run uvx lint
-        working-directory: ./python
-        run: uvx lint .
         
       - name: Run ruff format check
         working-directory: ./python
