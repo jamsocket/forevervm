@@ -2,13 +2,14 @@ import { Stream } from './stream'
 import { ExecResponse } from './types'
 
 export interface ExecOptions {
-  timeout?: number
+  timeoutSeconds?: number
   interrupt?: boolean
 }
 
 export interface Instruction {
   code: string
   max_duration_seconds?: number
+  timeout_seconds?: number
 }
 
 export type MessageToServer = {
@@ -125,7 +126,11 @@ export class ReplClient {
 
   async exec(code: string, options: ExecOptions = {}): Promise<ReplExecResult> {
     const request_id = this.nextRequestId++
-    const instruction = { code, max_runtime_ms: options.timeout }
+    const instruction = {
+      code,
+      max_runtime_ms: options.timeoutSeconds,
+      timeout_seconds: options.timeoutSeconds,
+    }
     const instructionSeq = await new Promise<number>((resolve) => {
       this.state = {
         type: 'waiting_for_instruction_seq',
