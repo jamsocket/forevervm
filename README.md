@@ -1,5 +1,5 @@
-foreverVM
-=========
+[foreverVM](https://forevervm.com)
+==================================
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/forevervm?style=social)](https://github.com/jamsocket/forevervm)
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947?color=404eed&label=discord)](https://discord.gg/N5sEpsuhh9)
