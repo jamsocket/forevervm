@@ -1,4 +1,5 @@
-import { ExecResponse } from './types'
+import type { ExecResponse } from './types'
+import type WebSocket from './ws'
 
 export interface ExecOptions {
   timeoutSeconds?: number
