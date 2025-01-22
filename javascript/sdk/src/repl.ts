@@ -48,8 +48,8 @@ export class ReplClient {
   constructor(ws: WebSocket) {
     this.ws = ws
     this.ws.addEventListener('message', ({ data }) => {
-      const msg = JSON.parse(data.toString()) as MessageFromServer
-      this.listener.dispatchEvent(new CustomEvent(msg.type, { detail: msg }))
+      const msg = JSON.parse(data.toString())
+      this.listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
     })
   }
 
@@ -93,9 +93,7 @@ export class ReplExecResult {
   constructor(requestId: number, listener: EventTarget) {
     this.#requestId = requestId
     this.#listener = listener
-    this.#listener.addEventListener('exec_received', this)
-    this.#listener.addEventListener('output', this)
-    this.#listener.addEventListener('result', this)
+    this.#listener.addEventListener('msg', this)
 
     const { promise, resolve, reject } = Promise.withResolvers<ExecResponse>()
     this.result = promise
