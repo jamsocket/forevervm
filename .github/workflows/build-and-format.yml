@@ -31,13 +31,4 @@ jobs:
       run: npm run build
       
     - name: Format
-      run: npm run format
-      
-    - name: Check for uncommitted changes
-      run: |
-        if [[ -n "$(git status --porcelain)" ]]; then
-          echo "There are uncommitted changes after formatting. Please run 'npm run format' locally and commit the changes."
-          git status
-          git diff
-          exit 1
-        fi
+      run: npm run check-format

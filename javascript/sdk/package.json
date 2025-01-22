@@ -8,7 +8,8 @@
     "build": "tsc",
     "test": "mocha -r ts-node/register 'test/**/*.test.ts'",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "check-format": "prettier --check src/**/*.ts"
   },
   "files": [
     "dist",
