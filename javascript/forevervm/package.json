@@ -46,6 +46,7 @@
     "oclif"
   ],
   "license": "MIT",
+  "type": "module",
   "main": "dist/index.js",
   "oclif": {
     "bin": "forevervm",
