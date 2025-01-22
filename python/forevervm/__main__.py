@@ -1,6 +1,7 @@
 import argparse
 from forevervm.commands.login import login
 
+
 def machine_create(args):
     print("Machine create command")
 
@@ -18,7 +19,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Login command
-    login_parser = subparsers.add_parser("login", help="Log in to ForeverVM")
+    _login_parser = subparsers.add_parser("login", help="Log in to ForeverVM")
 
     # Machine commands
     machine_parser = subparsers.add_parser(
@@ -29,13 +30,13 @@ def main():
     )
 
     # Machine create
-    create_parser = machine_subparsers.add_parser("create", help="Create a new machine")
+    _create_parser = machine_subparsers.add_parser("create", help="Create a new machine")
 
     # Machine list
-    list_parser = machine_subparsers.add_parser("list", help="List all machines")
+    _list_parser = machine_subparsers.add_parser("list", help="List all machines")
 
     # Machine REPL
-    repl_parser = machine_subparsers.add_parser(
+    _repl_parser = machine_subparsers.add_parser(
         "repl", help="Start a REPL session with a machine"
     )
 
