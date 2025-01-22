@@ -1,9 +1,15 @@
 import { Stream } from './stream'
 import { ExecResponse } from './types'
 
+export interface ExecOptions {
+  timeoutSeconds?: number
+  interrupt?: boolean
+}
+
 export interface Instruction {
   code: string
   max_duration_seconds?: number
+  timeout_seconds?: number
 }
 
 export type MessageToServer = {
@@ -65,37 +71,51 @@ export class ReplClient {
   }
 
   private recv(message: MessageFromServer) {
-    if (message.type === 'exec_received') {
-      if (this.state.type === 'waiting_for_instruction_seq') {
-        if (message.request_id === this.state.request_id) {
-          this.state.callback(message.seq)
-          this.state = { type: 'idle' }
-        } else {
+    switch (message.type) {
+      case 'exec_received': {
+        if (this.state.type !== 'waiting_for_instruction_seq') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
+        }
+
+        if (message.request_id !== this.state.request_id) {
           console.warn('Unexpected request id', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        this.state.callback(message.seq)
+        break
       }
-    } else if (message.type === 'result') {
-      if (this.state.type === 'waiting_for_result') {
-        if (message.instruction_id === this.state.instruction_id) {
-          this.state.resultCallback(message.result)
-          this.state = { type: 'idle' }
-        } else {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
+
+      case 'output': {
+        if (this.state.type !== 'waiting_for_result') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        if (message.instruction_id !== this.state.instruction_id) {
+          console.warn('Unexpected instruction id', this.state, 'with message', message)
+          return
+        }
+
+        this.state.outputCallback(message.chunk)
+        break
       }
-    } else if (message.type === 'output') {
-      if (this.state.type === 'waiting_for_result') {
-        if (message.instruction_id === this.state.instruction_id) {
-          this.state.outputCallback(message.chunk)
-        } else {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
+
+      case 'result': {
+        if (this.state.type !== 'waiting_for_result') {
+          console.warn('Unexpected message in state', this.state, 'with message', message)
+          return
         }
-      } else {
-        console.warn('Unexpected message in state', this.state, 'with message', message)
+
+        if (message.instruction_id !== this.state.instruction_id) {
+          console.warn('Unexpected instruction id', this.state, 'with message', message)
+          return
+        }
+
+        this.state.resultCallback(message.result)
+        this.state = { type: 'idle' }
+        break
       }
     }
   }
@@ -104,19 +124,20 @@ export class ReplClient {
     this.ws.send(JSON.stringify(message))
   }
 
-  async exec(instruction: Instruction): Promise<ReplExecResult> {
+  async exec(code: string, options: ExecOptions = {}): Promise<ReplExecResult> {
     const request_id = this.nextRequestId++
+    const instruction = {
+      code,
+      max_runtime_ms: options.timeoutSeconds,
+      timeout_seconds: options.timeoutSeconds,
+    }
     const instructionSeq = await new Promise<number>((resolve) => {
       this.state = {
         type: 'waiting_for_instruction_seq',
         request_id,
         callback: resolve,
       }
-      this.send({
-        type: 'exec',
-        instruction,
-        request_id,
-      })
+      this.send({ type: 'exec', instruction, request_id })
     })
 
     const result = new ReplExecResult()

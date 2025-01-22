@@ -1,7 +1,8 @@
-import { Args, Command } from '@oclif/core'
-import { getSDKFromEnv } from '../../config.js'
-import chalk from 'chalk'
 import { input } from '@inquirer/prompts'
+import { Args, Command } from '@oclif/core'
+import chalk from 'chalk'
+
+import { getSDKFromEnv } from '../../config.js'
 
 export default class MachineRepl extends Command {
   static override args = {
@@ -28,7 +29,7 @@ export default class MachineRepl extends Command {
         continue
       }
 
-      const execResult = await repl.exec({ code })
+      const execResult = await repl.exec(code)
 
       while (true) {
         let output = await execResult.nextOutput()
