@@ -9,6 +9,7 @@
   },
   "workspaces": [
     "sdk",
-    "forevervm"
+    "forevervm",
+    "example"
   ]
 }
