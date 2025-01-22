@@ -1,0 +1,15 @@
+{
+  "name": "forevervm-python-repl-example",
+  "version": "1.0.0",
+  "description": "Example of using foreverVM to run Python REPL commands",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "@forevervm/sdk": "file:../sdk"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}
