@@ -1,21 +1,15 @@
 {
   "name": "forevervm-python-repl-example",
   "version": "1.0.0",
-  "description": "Example of using ForeverVM to run Python REPL commands",
-  "main": "dist/index.js",
+  "description": "Example of using foreverVM to run Python REPL commands",
+  "type": "module",
   "scripts": {
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "check-format": "prettier --check src/**/*.ts",
-    "start": "ts-node src/index.ts"
+    "start": "tsx index.ts"
   },
   "dependencies": {
-    "@forevervm/sdk": "file:../sdk",
-    "prettier": "^3.4.2"
+    "@forevervm/sdk": "file:../sdk"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "tsx": "^4.19.2"
   }
 }
