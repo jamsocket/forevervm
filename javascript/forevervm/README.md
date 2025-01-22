@@ -1,3 +1,1 @@
-# foreverVM
-
-Repo for foreverVM CLI.
+../../README.md
