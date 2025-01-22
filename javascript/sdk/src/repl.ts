@@ -1,4 +1,3 @@
-import { Stream } from './stream'
 import { ExecResponse } from './types'
 
 export interface ExecOptions {
@@ -41,145 +40,101 @@ export type MessageFromServer =
       instruction_id: number
     }
 
-type ConnectionState =
-  | {
-      type: 'idle'
-    }
-  | {
-      type: 'waiting_for_instruction_seq'
-      request_id: number
-      callback: (instruction_seq: number) => void
-    }
-  | {
-      type: 'waiting_for_result'
-      resultCallback: (result: ExecResponse) => void
-      outputCallback: (output: StandardOutput) => void
-      instruction_id: number
-    }
-
 export class ReplClient {
   private ws: WebSocket
-  private state: ConnectionState = { type: 'idle' }
+  private listener = new EventTarget()
   private nextRequestId = 0
 
   constructor(ws: WebSocket) {
     this.ws = ws
     this.ws.addEventListener('message', ({ data }) => {
-      const message = JSON.parse(data.toString()) as MessageFromServer
-      this.recv(message)
+      const msg = JSON.parse(data.toString()) as MessageFromServer
+      this.listener.dispatchEvent(new CustomEvent(msg.type, { detail: msg }))
     })
-  }
-
-  private recv(message: MessageFromServer) {
-    switch (message.type) {
-      case 'exec_received': {
-        if (this.state.type !== 'waiting_for_instruction_seq') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.request_id !== this.state.request_id) {
-          console.warn('Unexpected request id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.callback(message.seq)
-        break
-      }
-
-      case 'output': {
-        if (this.state.type !== 'waiting_for_result') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.instruction_id !== this.state.instruction_id) {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.outputCallback(message.chunk)
-        break
-      }
-
-      case 'result': {
-        if (this.state.type !== 'waiting_for_result') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.instruction_id !== this.state.instruction_id) {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.resultCallback(message.result)
-        this.state = { type: 'idle' }
-        break
-      }
-    }
   }
 
   private send(message: MessageToServer) {
     this.ws.send(JSON.stringify(message))
   }
 
-  async exec(code: string, options: ExecOptions = {}): Promise<ReplExecResult> {
+  exec(code: string, options: ExecOptions = {}): ReplExecResult {
     const request_id = this.nextRequestId++
     const instruction = {
       code,
       max_runtime_ms: options.timeoutSeconds,
       timeout_seconds: options.timeoutSeconds,
     }
-    const instructionSeq = await new Promise<number>((resolve) => {
-      this.state = {
-        type: 'waiting_for_instruction_seq',
-        request_id,
-        callback: resolve,
-      }
-      this.send({ type: 'exec', instruction, request_id })
-    })
 
-    const result = new ReplExecResult()
-    this.state = {
-      type: 'waiting_for_result',
-      instruction_id: instructionSeq,
-      resultCallback: (execResult) => result.setResult(execResult),
-      outputCallback: (output) => result.addOutput(output),
-    }
-    return result
+    this.send({ type: 'exec', instruction, request_id })
+    this.listener = new EventTarget()
+    return new ReplExecResult(this.listener)
   }
 }
 
 export class ReplExecResult {
-  private resultPromise: Promise<ExecResponse>
-  private output: Stream<StandardOutput> = new Stream()
-  private resultResolver?: (result: ExecResponse) => void
+  #listener: EventTarget
+  #done = false
+  #resolve: (response: ExecResponse) => void
+  #reject: (reason: any) => void
 
-  constructor() {
-    this.resultPromise = new Promise<ExecResponse>((resolve) => {
-      this.resultResolver = resolve
-    })
-  }
+  #buffer: StandardOutput[] = []
+  #advance: (() => void) | undefined = undefined
 
-  setResult(result: ExecResponse) {
-    if (this.resultResolver) {
-      this.resultResolver(result)
+  result: Promise<ExecResponse>
+  output: AsyncIterable<StandardOutput, undefined>
+
+  constructor(listener: EventTarget) {
+    this.#listener = listener
+    this.#listener.addEventListener('exec_received', this)
+    this.#listener.addEventListener('output', this)
+    this.#listener.addEventListener('result', this)
+
+    const { promise, resolve, reject } = Promise.withResolvers<ExecResponse>()
+    this.result = promise
+    this.#resolve = resolve
+    this.#reject = reject
+
+    this.output = {
+      [Symbol.asyncIterator]: () => ({
+        next: async () => {
+          while (true) {
+            const value = this.#buffer.shift()
+            if (value) return { value, done: false }
+
+            if (this.#done) return { done: true }
+
+            const { promise, resolve } = Promise.withResolvers<void>()
+            this.#advance = resolve
+            await promise
+          }
+        },
+      }),
     }
-    if (this.output) {
-      this.output.close()
+  }
+
+  #flush() {
+    while (this.#advance) {
+      this.#advance()
+      this.#advance = undefined
     }
   }
 
-  addOutput(output: StandardOutput) {
-    this.output.push(output)
-  }
+  handleEvent(event: CustomEvent) {
+    const detail = event.detail as MessageFromServer
+    switch (detail.type) {
+      case 'exec_received':
+        break
 
-  async nextOutput(): Promise<StandardOutput | null> {
-    return await this.output.next()
-  }
+      case 'output':
+        this.#buffer.push(detail.chunk)
+        this.#flush()
+        break
 
-  async result(): Promise<ExecResponse> {
-    return await this.resultPromise
+      case 'result':
+        this.#done = true
+        this.#flush()
+        this.#resolve(detail.result)
+        break
+    }
   }
 }
