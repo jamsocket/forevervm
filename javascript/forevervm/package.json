@@ -66,6 +66,7 @@
   "repository": "jamsocket/forevervm",
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
