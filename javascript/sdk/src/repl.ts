@@ -65,7 +65,6 @@ export class ReplClient {
   }
 
   private recv(message: MessageFromServer) {
-    console.log('RECV', message)
     if (message.type === 'exec_received') {
       if (this.state.type === 'waiting_for_instruction_seq') {
         if (message.request_id === this.state.request_id) {
