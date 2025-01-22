@@ -1,4 +1,3 @@
-import { Stream } from './stream'
 import { ExecResponse } from './types'
 
 export interface ExecOptions {
@@ -40,146 +39,132 @@ export type MessageFromServer =
       chunk: StandardOutput
       instruction_id: number
     }
-
-type ConnectionState =
   | {
-      type: 'idle'
-    }
-  | {
-      type: 'waiting_for_instruction_seq'
-      request_id: number
-      callback: (instruction_seq: number) => void
-    }
-  | {
-      type: 'waiting_for_result'
-      resultCallback: (result: ExecResponse) => void
-      outputCallback: (output: StandardOutput) => void
-      instruction_id: number
+      type: 'error'
+      code: string
+      id: string
     }
 
 export class ReplClient {
   private ws: WebSocket
-  private state: ConnectionState = { type: 'idle' }
+  private listener = new EventTarget()
   private nextRequestId = 0
 
   constructor(ws: WebSocket) {
     this.ws = ws
     this.ws.addEventListener('message', ({ data }) => {
-      const message = JSON.parse(data.toString()) as MessageFromServer
-      this.recv(message)
+      const msg = JSON.parse(data.toString())
+      this.listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
     })
-  }
-
-  private recv(message: MessageFromServer) {
-    switch (message.type) {
-      case 'exec_received': {
-        if (this.state.type !== 'waiting_for_instruction_seq') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.request_id !== this.state.request_id) {
-          console.warn('Unexpected request id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.callback(message.seq)
-        break
-      }
-
-      case 'output': {
-        if (this.state.type !== 'waiting_for_result') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.instruction_id !== this.state.instruction_id) {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.outputCallback(message.chunk)
-        break
-      }
-
-      case 'result': {
-        if (this.state.type !== 'waiting_for_result') {
-          console.warn('Unexpected message in state', this.state, 'with message', message)
-          return
-        }
-
-        if (message.instruction_id !== this.state.instruction_id) {
-          console.warn('Unexpected instruction id', this.state, 'with message', message)
-          return
-        }
-
-        this.state.resultCallback(message.result)
-        this.state = { type: 'idle' }
-        break
-      }
-    }
   }
 
   private send(message: MessageToServer) {
     this.ws.send(JSON.stringify(message))
   }
 
-  async exec(code: string, options: ExecOptions = {}): Promise<ReplExecResult> {
+  exec(code: string, options: ExecOptions = {}): ReplExecResult {
     const request_id = this.nextRequestId++
     const instruction = {
       code,
       max_runtime_ms: options.timeoutSeconds,
       timeout_seconds: options.timeoutSeconds,
     }
-    const instructionSeq = await new Promise<number>((resolve) => {
-      this.state = {
-        type: 'waiting_for_instruction_seq',
-        request_id,
-        callback: resolve,
-      }
-      this.send({ type: 'exec', instruction, request_id })
-    })
 
-    const result = new ReplExecResult()
-    this.state = {
-      type: 'waiting_for_result',
-      instruction_id: instructionSeq,
-      resultCallback: (execResult) => result.setResult(execResult),
-      outputCallback: (output) => result.addOutput(output),
-    }
-    return result
+    this.send({ type: 'exec', instruction, request_id })
+    this.listener = new EventTarget()
+    return new ReplExecResult(request_id, this.listener)
   }
 }
 
 export class ReplExecResult {
-  private resultPromise: Promise<ExecResponse>
-  private output: Stream<StandardOutput> = new Stream()
-  private resultResolver?: (result: ExecResponse) => void
+  #requestId: number
+  #listener: EventTarget
 
-  constructor() {
-    this.resultPromise = new Promise<ExecResponse>((resolve) => {
-      this.resultResolver = resolve
-    })
-  }
+  // instruction state
+  #instructionId: number | undefined
 
-  setResult(result: ExecResponse) {
-    if (this.resultResolver) {
-      this.resultResolver(result)
+  // stdout/stderr state
+  #buffer: StandardOutput[] = []
+  #advance: (() => void) | undefined = undefined
+
+  // result state
+  #done = false
+  #resolve: (response: ExecResponse) => void
+  #reject: (reason: any) => void
+
+  result: Promise<ExecResponse>
+  output: AsyncIterable<StandardOutput, undefined>
+
+  constructor(requestId: number, listener: EventTarget) {
+    this.#requestId = requestId
+    this.#listener = listener
+    this.#listener.addEventListener('msg', this)
+
+    const { promise, resolve, reject } = Promise.withResolvers<ExecResponse>()
+    this.result = promise
+    this.#resolve = resolve
+    this.#reject = reject
+
+    this.output = {
+      [Symbol.asyncIterator]: () => ({
+        next: async () => {
+          while (true) {
+            const value = this.#buffer.shift()
+            if (value) return { value, done: false }
+
+            if (this.#done) return { done: true }
+
+            const { promise, resolve } = Promise.withResolvers<void>()
+            this.#advance = resolve
+            await promise
+          }
+        },
+      }),
     }
-    if (this.output) {
-      this.output.close()
+  }
+
+  #flush() {
+    while (this.#advance) {
+      this.#advance()
+      this.#advance = undefined
     }
   }
 
-  addOutput(output: StandardOutput) {
-    this.output.push(output)
-  }
+  handleEvent(event: CustomEvent) {
+    const msg = event.detail as MessageFromServer
+    switch (msg.type) {
+      case 'exec_received':
+        if (msg.request_id !== this.#requestId) {
+          console.warn(`Expected request ID ${this.#requestId} with message`, msg)
+          break
+        }
 
-  async nextOutput(): Promise<StandardOutput | null> {
-    return await this.output.next()
-  }
+        this.#instructionId = msg.seq
+        break
 
-  async result(): Promise<ExecResponse> {
-    return await this.resultPromise
+      case 'output':
+        if (msg.instruction_id !== this.#instructionId) {
+          console.warn(`Expected instruction ID ${this.#instructionId} with message`, msg)
+          break
+        }
+
+        this.#buffer.push(msg.chunk)
+        this.#flush()
+        break
+
+      case 'result':
+        if (msg.instruction_id !== this.#instructionId) {
+          console.warn(`Expected instruction ID ${this.#instructionId} with message`, msg)
+          break
+        }
+
+        this.#done = true
+        this.#flush()
+        this.#resolve(msg.result)
+        break
+
+      case 'error':
+        this.#reject(new Error(msg.code))
+    }
   }
 }
