@@ -20,36 +20,36 @@ export type StandardOutput = {
 
 export type MessageFromServer =
   | {
-    type: 'exec_received'
-    seq: number // TODO: rename to instruction_id
-    request_id: number
-  }
+      type: 'exec_received'
+      seq: number // TODO: rename to instruction_id
+      request_id: number
+    }
   | {
-    type: 'result'
-    instruction_id: number
-    result: ExecResponse
-  }
+      type: 'result'
+      instruction_id: number
+      result: ExecResponse
+    }
   | {
-    type: 'output'
-    chunk: StandardOutput
-    instruction_id: number
-  }
+      type: 'output'
+      chunk: StandardOutput
+      instruction_id: number
+    }
 
 type ConnectionState =
   | {
-    type: 'idle'
-  }
+      type: 'idle'
+    }
   | {
-    type: 'waiting_for_instruction_seq'
-    request_id: number
-    callback: (instruction_seq: number) => void
-  }
+      type: 'waiting_for_instruction_seq'
+      request_id: number
+      callback: (instruction_seq: number) => void
+    }
   | {
-    type: 'waiting_for_result'
-    resultCallback: (result: ExecResponse) => void
-    outputCallback: (output: StandardOutput) => void
-    instruction_id: number
-  }
+      type: 'waiting_for_result'
+      resultCallback: (result: ExecResponse) => void
+      outputCallback: (output: StandardOutput) => void
+      instruction_id: number
+    }
 
 export class ReplClient {
   private ws: WebSocket
