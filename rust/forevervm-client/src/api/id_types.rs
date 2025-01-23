@@ -1,15 +1,3 @@
-//! This module defines ID and sequence types.
-//!
-//! Both IDs and sequence numbers are i64s, because that's what Postgres uses, even though
-//! they are never negative.
-//!
-//! IDs are globally unique. They should not be shared with the client directly.
-//!
-//! Sequence numbers sequentially increase per machine. They differ from IDs in that:
-//!   - they are not globally unique
-//!   - their sequential order matters
-//!   - they can be shared with the client
-
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
