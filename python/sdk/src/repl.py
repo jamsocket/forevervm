@@ -33,13 +33,17 @@ class ReplExecResult:
 
         elif msg["type"] == "output":
             if msg["instruction_id"] != self._instruction_id:
-                warn(f"Expected instruction ID {self._instruction_id} with message {msg}")
+                warn(
+                    f"Expected instruction ID {self._instruction_id} with message {msg}"
+                )
                 return
             self._output.append(msg["chunk"])
 
         elif msg["type"] == "result":
             if msg["instruction_id"] != self._instruction_id:
-                warn(f"Expected instruction ID {self._instruction_id} with message {msg}")
+                warn(
+                    f"Expected instruction ID {self._instruction_id} with message {msg}"
+                )
                 return
             self._result = msg["result"]
 

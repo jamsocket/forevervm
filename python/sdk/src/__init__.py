@@ -30,13 +30,13 @@ class ForeverVM:
 
     @property
     def _client(self):
-        if self.__client == None:
+        if self.__client is None:
             self.__client = httpx.Client(headers=self._headers())
         return self.__client
 
     @property
     def _client_async(self):
-        if self.__client_async == None:
+        if self.__client_async is None:
             self.__client_async = httpx.AsyncClient()
         return self.__client_async
 
