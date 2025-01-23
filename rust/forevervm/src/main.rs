@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use forevervm::{
     commands::{
-        auth::{login, whoami},
+        auth::{login, logout, whoami},
         machine::{machine_list, machine_new},
         repl::machine_repl,
     },
@@ -24,6 +24,8 @@ enum Commands {
         #[arg(long, default_value = DEFAULT_SERVER_URL)]
         api_base_url: Url,
     },
+    /// Logout from your account
+    Logout,
     Whoami,
     /// Machine management commands
     Machine {
@@ -57,6 +59,9 @@ async fn main() {
     match cli.command {
         Commands::Login { api_base_url } => {
             login(api_base_url).await.unwrap();
+        }
+        Commands::Logout => {
+            logout().await.unwrap();
         }
         Commands::Whoami => {
             whoami().await.unwrap();

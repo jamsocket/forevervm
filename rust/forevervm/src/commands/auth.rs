@@ -64,3 +64,19 @@ pub async fn login(base_url: Url) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+pub async fn logout() -> anyhow::Result<()> {
+    let config_manager = ConfigManager::new()?;
+    let mut config = config_manager.load()?;
+
+    if config.token.is_none() {
+        println!("Not currently logged in");
+        return Ok(());
+    }
+
+    // Clear the token
+    config.token = None;
+    config_manager.save(&config)?;
+    println!("Successfully logged out");
+    Ok(())
+}
