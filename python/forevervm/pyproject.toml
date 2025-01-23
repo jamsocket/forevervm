@@ -1,3 +1,6 @@
 [project]
 name = "forevervm"
-version = "0.1.0"
+version = "0.1.9"
+
+[project.scripts]
+forevervm = "forevervm:run_binary"
