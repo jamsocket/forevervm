@@ -142,7 +142,9 @@ jobs:
         override: true
         
     - name: Install mingw
-      run: sudo apt-get install -y gcc-mingw-w64
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mingw-w64 g++-mingw-w64-x86-64
 
     - name: Build for Windows
       uses: actions-rs/cargo@v1
