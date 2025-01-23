@@ -21,22 +21,17 @@ jobs:
       with:
         components: rustfmt, clippy
 
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: "true"
+        workspaces: |
+          rust
+
     - name: Check formatting
       run: cargo fmt --all -- --check
 
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
-
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          rust/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
 
     - name: Build
       run: cargo build --verbose
