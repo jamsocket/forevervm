@@ -1,7 +1,7 @@
 import httpx
 from typing import Type, cast
 
-
+from .repl import Repl
 from .types import (
     CreateMachineResponse,
     ExecResponse,
@@ -19,16 +19,19 @@ class ForeverVM:
     __client_async: httpx.AsyncClient | None = None
 
     def __init__(self, token: str, base_url=API_BASE_URL):
-        self.token = token
-        self.base_url = base_url
+        self._token = token
+        self._base_url = base_url
 
     def _url(self, path: str):
-        return f"{self.base_url}{path}"
+        return f"{self._base_url}{path}"
+
+    def _headers(self):
+        return {"authorization": f"Bearer {self._token}"}
 
     @property
     def _client(self):
         if self.__client == None:
-            self.__client = httpx.Client()
+            self.__client = httpx.Client(headers=self._headers())
         return self.__client
 
     @property
@@ -38,9 +41,7 @@ class ForeverVM:
         return self.__client_async
 
     def _get[T](self, path: str, type: Type[T]):
-        response = self._client.get(
-            self._url(path), headers={"Authorization": f"Bearer {self.token}"}
-        )
+        response = self._client.get(self._url(path), headers=self._headers())
 
         response.raise_for_status()
 
@@ -49,7 +50,7 @@ class ForeverVM:
 
     async def _get_async[T](self, path: str, type: Type[T]):
         response = await self._client_async.get(
-            self._url(path), headers={"Authorization": f"Bearer {self.token}"}
+            self._url(path), headers=self._headers()
         )
 
         response.raise_for_status()
@@ -60,7 +61,7 @@ class ForeverVM:
     def _post[T](self, path, type: Type[T], data=None):
         response = self._client.post(
             self._url(path),
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers=self._headers(),
             json=data,
         )
 
@@ -72,7 +73,7 @@ class ForeverVM:
     async def _post_async[T](self, path, type: Type[T], data=None):
         response = await self._client_async.post(
             self._url(path),
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"authorization": f"Bearer {self._token}"},
             json=data,
         )
 
@@ -135,5 +136,5 @@ class ForeverVM:
             type=ExecResultResponse,
         )
 
-    def repl(self):
-        pass
+    def repl(self, machine_name="new"):
+        return Repl(token=self._token, machine_name=machine_name)
