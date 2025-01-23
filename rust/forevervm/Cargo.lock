@@ -518,7 +518,7 @@ dependencies = [
  "clap",
  "colorize",
  "dirs",
- "forevervm-client",
+ "forevervm-sdk",
  "rpassword",
  "rustyline",
  "serde",
@@ -528,7 +528,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "forevervm-client"
+name = "forevervm-sdk"
 version = "0.1.0"
 dependencies = [
  "chrono",

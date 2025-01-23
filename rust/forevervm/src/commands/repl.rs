@@ -1,6 +1,6 @@
 use crate::config::ConfigManager;
 use colorize::AnsiColor;
-use forevervm_client::api::{api_types::ExecResultType, id_types::MachineName};
+use forevervm_sdk::api::{api_types::ExecResultType, id_types::MachineName};
 use rustyline::{error::ReadlineError, DefaultEditor};
 
 pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<()> {

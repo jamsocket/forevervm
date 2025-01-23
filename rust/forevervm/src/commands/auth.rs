@@ -1,5 +1,5 @@
 use colorize::AnsiColor;
-use forevervm_client::{api::token::ApiToken, client::ForeverVMClient};
+use forevervm_sdk::{api::token::ApiToken, client::ForeverVMClient};
 use url::Url;
 
 use crate::config::ConfigManager;

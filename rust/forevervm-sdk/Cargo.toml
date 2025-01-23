@@ -1,11 +1,12 @@
 [package]
-name = "forevervm-client"
+name = "forevervm-sdk"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://forevervm.com/"
 repository = "https://github.com/jamsocket/forevervm"
 readme = "README.md"
+description = "foreverVM SDK. Allows you to start foreverVMs and run a REPL on them."
 
 [dependencies]
 chrono = { version = "0.4.39", features = ["serde"] }
