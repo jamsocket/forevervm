@@ -1,8 +1,7 @@
+use crate::config::ConfigManager;
 use colorize::AnsiColor;
 use forevervm_sdk::{api::token::ApiToken, client::ForeverVMClient};
 use url::Url;
-
-use crate::config::ConfigManager;
 
 pub async fn whoami() -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
