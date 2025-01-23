@@ -47,8 +47,10 @@ pub struct WebSocketRecv<Recv: DeserializeOwned> {
 }
 
 impl<Recv: DeserializeOwned> WebSocketRecv<Recv> {
-    pub async fn recv(&mut self) -> Result<Recv, ClientError> {
-        let msg = self.socket_recv.next().await.unwrap()?;
-        Ok(serde_json::from_str(&msg.into_text()?)?)
+    pub async fn recv(&mut self) -> Result<Option<Recv>, ClientError> {
+        let Some(msg) = self.socket_recv.next().await else {
+            return Ok(None);
+        };
+        Ok(serde_json::from_str(&msg?.into_text()?)?)
     }
 }

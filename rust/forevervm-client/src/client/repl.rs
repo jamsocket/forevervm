@@ -66,7 +66,7 @@ fn handle_message(
     let msg = message;
     match msg {
         MessageFromServer::ExecReceived { seq, request_id } => {
-            let mut state = state.lock().unwrap();
+            let mut state = state.lock().expect("State lock poisoned");
             let old_state = std::mem::take(state.deref_mut());
 
             match old_state {
@@ -103,7 +103,7 @@ fn handle_message(
             }
         }
         MessageFromServer::Result(result) => {
-            let mut state = state.lock().unwrap();
+            let mut state = state.lock().expect("State lock poisoned");
             let old_state = std::mem::take(state.deref_mut());
 
             match old_state {
@@ -132,7 +132,7 @@ fn handle_message(
             chunk,
             instruction_id: instruction,
         } => {
-            let state = state.lock().unwrap();
+            let state = state.lock().expect("State lock poisoned");
 
             match state.deref() {
                 ReplConnectionState::WaitingForResult {
@@ -169,7 +169,7 @@ async fn receive_loop(
     mut receiver: WebSocketRecv<MessageFromServer>,
     state: Arc<Mutex<ReplConnectionState>>,
 ) {
-    while let Ok(msg) = receiver.recv().await {
+    while let Ok(Some(msg)) = receiver.recv().await {
         if let Err(err) = handle_message(msg, state.clone()) {
             tracing::error!(?err, "Failed to handle message");
         }
@@ -212,7 +212,7 @@ impl ReplConnection {
 
         let (send_result_handle, receive_result_handle) = oneshot::channel::<ExecResultHandle>();
         {
-            let mut state = self.state.lock().unwrap();
+            let mut state = self.state.lock().expect("State lock poisoned");
 
             *state.deref_mut() = ReplConnectionState::WaitingForInstructionSeq {
                 request_id,
