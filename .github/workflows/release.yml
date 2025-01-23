@@ -12,88 +12,88 @@ on:
       - ".github/workflows/release.yml"
 
 jobs:
-  # build-macos-arm64:
-  #   runs-on: macos-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v4
+  build-macos-arm64:
+    runs-on: ubuntu-22.04-arm
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-  #   - name: Install latest rust toolchain
-  #     uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: beta
-  #       target: aarch64-apple-darwin
-  #       default: true
-  #       override: true
+    - name: Install latest rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: beta
+        target: aarch64-apple-darwin
+        default: true
+        override: true
 
-  #   - name: Build for MacOS
-  #     uses: actions-rs/cargo@v1
-  #     with:
-  #       command: build
-  #       args: --manifest-path=rust/forevervm/Cargo.toml --bin forevervm --target aarch64-apple-darwin --release
+    - name: Build for MacOS
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --manifest-path=rust/forevervm/Cargo.toml --bin forevervm --target aarch64-apple-darwin --release
 
-  #   - name: strip binary
-  #     run: strip ./rust/target/aarch64-apple-darwin/release/forevervm
+    - name: strip binary
+      run: strip ./rust/target/aarch64-apple-darwin/release/forevervm
 
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: macos-binary-arm64
-  #       path: ./rust/target/aarch64-apple-darwin/release/forevervm
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-binary-arm64
+        path: ./rust/target/aarch64-apple-darwin/release/forevervm
 
-  # build-macos-x64:
-  #   runs-on: macos-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v4
+  build-macos-x64:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-  #   - name: Install latest rust toolchain
-  #     uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: beta
-  #       target: x86_64-apple-darwin
-  #       default: true
-  #       override: true
+    - name: Install latest rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: beta
+        target: x86_64-apple-darwin
+        default: true
+        override: true
 
-  #   - name: Build for MacOS
-  #     uses: actions-rs/cargo@v1
-  #     with:
-  #       command: build
-  #       args: --release --manifest-path=rust/forevervm/Cargo.toml --bin forevervm --target x86_64-apple-darwin
+    - name: Build for MacOS
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --manifest-path=rust/forevervm/Cargo.toml --bin forevervm --target x86_64-apple-darwin
 
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: macos-binary-x64
-  #       path: ./rust/target/x86_64-apple-darwin/release/forevervm 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-binary-x64
+        path: ./rust/target/x86_64-apple-darwin/release/forevervm 
 
-  # build-linux:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v2
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
       
-  #   - name: Setup Rust
-  #     uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: stable
-  #       target: x86_64-unknown-linux-musl
-  #       override: true
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-unknown-linux-musl
+        override: true
         
-  #   - name: Install musl-tools 
-  #     run: sudo apt-get install -y musl-tools
+    - name: Install musl-tools 
+      run: sudo apt-get install -y musl-tools
 
-  #   - name: Build for Linux
-  #     uses: actions-rs/cargo@v1
-  #     with:
-  #       command: build
-  #       args: --release --target x86_64-unknown-linux-musl --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
+    - name: Build for Linux
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --target x86_64-unknown-linux-musl --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
         
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: linux-binary
-  #       path: ./rust/target/x86_64-unknown-linux-musl/release/forevervm 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-binary
+        path: ./rust/target/x86_64-unknown-linux-musl/release/forevervm 
 
   build-linux-arm64:
     runs-on: ubuntu-22.04-arm
@@ -122,47 +122,46 @@ jobs:
         name: linux-binary-arm64
         path: ./rust/target/aarch64-unknown-linux-musl/release/forevervm
 
-  # build-windows:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v2 
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2 
 
-  #   - name: Setup Rust
-  #     uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: stable
-  #       target: x86_64-pc-windows-gnu
-  #       override: true
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-pc-windows-gnu
+        override: true
         
-  #   - name: Install requirements
-  #     run: |
-  #       sudo apt-get update
-  #       sudo apt-get install -y gcc-mingw-w64 g++-mingw-w64-x86-64 nasm
+    - name: Install requirements
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mingw-w64 g++-mingw-w64-x86-64 nasm
 
-  #   - name: Set NASM path
-  #     run: |
-  #       echo "AWS_LC_SYS_PREBUILT_NASM=false" >> $GITHUB_ENV
-  #       which nasm
+    - name: Set NASM path
+      run: |
+        echo "AWS_LC_SYS_PREBUILT_NASM=false" >> $GITHUB_ENV
+        which nasm
 
-  #   - name: Build for Windows
-  #     uses: actions-rs/cargo@v1
-  #     with:
-  #       command: build
-  #       args: --release --target x86_64-pc-windows-gnu --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
+    - name: Build for Windows
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --target x86_64-pc-windows-gnu --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
 
-  #   - name: ls
-  #     run: ls ./rust/target/x86_64-pc-windows-gnu/release
+    - name: ls
+      run: ls ./rust/target/x86_64-pc-windows-gnu/release
       
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: windows-binary
-  #       path: ./rust/target/x86_64-pc-windows-gnu/release/forevervm.exe
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-binary
+        path: ./rust/target/x86_64-pc-windows-gnu/release/forevervm.exe
 
   release:
-    # needs: [build-linux, build-macos-arm64, build-macos-x64, build-windows, build-linux-arm64]
-    needs: [build-linux-arm64]
+    needs: [build-linux, build-macos-arm64, build-macos-x64, build-windows, build-linux-arm64]
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
