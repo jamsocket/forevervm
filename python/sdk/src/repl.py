@@ -1,9 +1,7 @@
 from collections import deque
 
-
 import httpx
 from httpx_ws import WebSocketSession, connect_ws
-
 
 from .types import ExecResult, StandardOutput
 
