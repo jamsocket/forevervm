@@ -1,6 +1,6 @@
 [package]
 name = "forevervm-sdk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://forevervm.com/"
@@ -11,7 +11,7 @@ description = "foreverVM SDK. Allows you to start foreverVMs and run a REPL on t
 [dependencies]
 chrono = { version = "0.4.39", features = ["serde"] }
 futures-util = "0.3.31"
-reqwest = { version = "0.12.12", features = ["json"] }
+reqwest = { version = "0.12.12", default-features = false, features = ["rustls-tls"] }
 rustls = "0.23.21"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.137"
