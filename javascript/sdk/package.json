@@ -1,13 +1,27 @@
 {
   "name": "@forevervm/sdk",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "Developer SDK for ForeverVM",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "browser": {
+    "./src/ws.js": "./src/ws.browser.js"
+  },
   "scripts": {
-    "build": "tsc",
-    "test": "mocha -r ts-node/register 'test/**/*.test.ts'",
-    "lint": "eslint . --ext .ts",
+    "build": "tsup src/index.ts --format esm,cjs --clean --dts --sourcemap",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"",
     "check-format": "prettier --check src/**/*.ts"
   },
@@ -19,12 +33,10 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.7",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.0.0",
-    "mocha": "^10.0.0",
-    "prettier": "^2.0.0",
-    "ts-node": "^10.0.0",
-    "typescript": "^5.7.3"
+    "@types/ws": "^8.5.13",
+    "prettier": "^2.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
   }
 }

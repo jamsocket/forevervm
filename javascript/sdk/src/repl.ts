@@ -1,4 +1,5 @@
-import { ExecResponse } from './types'
+import type { ExecResponse } from './types'
+import type WebSocket from './ws'
 
 export interface ExecOptions {
   timeoutSeconds?: number
@@ -45,7 +46,7 @@ export type MessageFromServer =
       id: string
     }
 
-export class ReplClient {
+export class Repl {
   private ws: WebSocket
   private listener = new EventTarget()
   private nextRequestId = 0

@@ -1,11 +1,12 @@
-import { ReplClient } from './repl'
-import {
+import { Repl } from './repl'
+import type {
   ApiExecResponse,
   ApiExecResponseResult,
   CreateMachineResponse,
   ListMachinesResponse,
   WhoamiResponse,
 } from './types'
+import WebSocket from './ws'
 
 export * from './types'
 export * from './repl'
@@ -82,20 +83,18 @@ export class ForeverVM {
     return await this.getRequest(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
   }
 
-  async repl(machineName: string | null): Promise<ReplClient> {
-    return new Promise<ReplClient>((resolve, reject) => {
+  async repl(machineName = 'new'): Promise<Repl> {
+    return new Promise<Repl>((resolve, reject) => {
       const ws = new WebSocket(
-        `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName ?? 'new'}/repl`,
+        `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName}/repl`,
         { headers: { Authorization: `Bearer ${this.token}` } } as any,
       )
 
       ws.addEventListener('open', () => {
-        resolve(new ReplClient(ws))
+        resolve(new Repl(ws))
       })
 
-      ws.addEventListener('error', (error) => {
-        reject(error)
-      })
+      ws.addEventListener('error', reject)
     })
   }
 }

@@ -10,26 +10,29 @@ on:
 jobs:
   build-and-format:
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: javascript
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: javascript/package-lock.json
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build
-      run: npm run build
-      
-    - name: Format
-      run: npm run check-format
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: javascript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Format
+        run: npm run check-format
+
+      - name: Check Types
+        run: npm run typecheck

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
     "format": "npm run format --workspaces",
     "check-format": "npm run check-format --workspaces",
     "publish": "npm publish --workspaces",
@@ -11,5 +12,9 @@
   "workspaces": [
     "sdk",
     "forevervm"
-  ]
+  ],
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
+  }
 }

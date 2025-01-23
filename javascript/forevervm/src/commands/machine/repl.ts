@@ -19,7 +19,7 @@ export default class MachineRepl extends Command {
     const { args } = await this.parse(MachineRepl)
     const sdk = getSDKFromEnv(this.config.configDir)
 
-    const repl = await sdk.repl(args.machine ?? null)
+    const repl = await sdk.repl(args.machine)
 
     if (args.machine) {
       this.log(`Connected to ${chalk.green(args.machine)}!`)
