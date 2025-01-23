@@ -60,7 +60,7 @@ if (!token) {
   throw new Error('FOREVERVM_TOKEN is not set')
 }
 
-// Initialize ForeverVM
+// Initialize foreverVM
 const fvm = new ForeverVM(token)
 
 // Connect to a new machine.
