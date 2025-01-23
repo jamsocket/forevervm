@@ -10,12 +10,14 @@ pub struct ApiToken {
 }
 
 impl ApiToken {
-    pub fn new(token: String) -> Self {
-        let (id, token) = token.split_once(SEPARATOR).unwrap();
-        Self {
+    pub fn new(token: String) -> Result<Self, ApiTokenError> {
+        let (id, token) = token
+            .split_once(SEPARATOR)
+            .ok_or(ApiTokenError::InvalidFormat)?;
+        Ok(Self {
             id: id.to_string(),
             token: token.to_string(),
-        }
+        })
     }
 }
 

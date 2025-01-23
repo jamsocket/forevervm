@@ -45,7 +45,7 @@ pub async fn login(base_url: Url) -> anyhow::Result<()> {
     }
 
     let token = rpassword::prompt_password("Enter your token: ")?;
-    let token = ApiToken::new(token);
+    let token = ApiToken::new(token)?;
     let client = ForeverVMClient::new(base_url.clone(), token.clone());
     match client.whoami().await {
         Ok(whoami) => {
