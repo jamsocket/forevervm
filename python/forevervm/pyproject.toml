@@ -3,4 +3,4 @@ name = "forevervm"
 version = "0.1.10"
 
 [project.scripts]
-forevervm = "forevervm:run_binary"
+forevervm = "forevervm.run:run"
