@@ -54,7 +54,7 @@ Using the API
 
 ```python
 import os
-from forevervm import ForeverVM
+from forevervm_sdk import ForeverVM
 
 token = os.getenv('FOREVERVM_TOKEN')
 if not token:
