@@ -1,8 +1,10 @@
 use clap::{Parser, Subcommand};
 use forevervm::{
+    api::id_types::MachineName,
     commands::{
         auth::{login, whoami},
         machine::{machine_list, machine_new},
+        repl::machine_repl,
     },
     DEFAULT_SERVER_URL,
 };
@@ -29,7 +31,10 @@ enum Commands {
         command: MachineCommands,
     },
     /// Start a REPL session
-    Repl,
+    Repl {
+        /// The name of the machine to run a repl on.
+        machine_name: Option<MachineName>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -39,7 +44,10 @@ enum MachineCommands {
     /// List all machines
     List,
     /// Start a REPL session for a specific machine
-    Repl,
+    Repl {
+        /// The name of the machine to run a repl on.
+        machine_name: Option<MachineName>,
+    },
 }
 
 #[tokio::main]
@@ -60,13 +68,12 @@ async fn main() {
             MachineCommands::List => {
                 machine_list().await.unwrap();
             }
-            MachineCommands::Repl => {
-                todo!()
+            MachineCommands::Repl { machine_name } => {
+                machine_repl(machine_name).await.unwrap();
             }
         },
-        Commands::Repl => {
-            println!("Starting global REPL...");
-            todo!()
+        Commands::Repl { machine_name } => {
+            machine_repl(machine_name).await.unwrap();
         }
     }
 }
