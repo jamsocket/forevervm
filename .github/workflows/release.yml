@@ -151,13 +151,13 @@ jobs:
         args: --release --target x86_64-pc-windows-gnu --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
 
     - name: ls
-      run: ls ./rust/target/x86_64-pc-windows-gnu/release
+      run: ls ./rust/forevervm/target/x86_64-pc-windows-gnu/release
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: windows-binary
-        path: ./rust/target/x86_64-pc-windows-gnu/release/forevervm.exe
+        path: ./rust/forevervm/target/x86_64-pc-windows-gnu/release/forevervm.exe
 
   release:
     needs: [build-linux, build-macos-arm64, build-macos-x64, build-windows, build-linux-arm64]
