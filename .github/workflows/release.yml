@@ -98,35 +98,33 @@ jobs:
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
+    - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
         target: aarch64-unknown-linux-musl
         override: true
         
-    - name: Install musl-tools 
-      run: sudo apt-get install -y musl-tools
-
-    - run: sudo apt-get install gcc-aarch64-linux-gnu
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu musl-dev
 
     - name: Build for Linux
       uses: actions-rs/cargo@v1
       env:
         CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
-        CC: aarch64-linux-gnu-gcc
+        CC_aarch64_unknown_linux_musl: aarch64-linux-gnu-gcc
+        RUSTFLAGS: '-C target-feature=+crt-static'
       with:
         command: build
         args: --release --target aarch64-unknown-linux-musl --manifest-path=rust/forevervm/Cargo.toml --bin forevervm
-        
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
+            
+    - uses: actions/upload-artifact@v4
       with:
         name: linux-binary-arm64
-        path: ./rust/target/aarch64-unknown-linux-musl/release/forevervm 
+        path: ./rust/target/aarch64-unknown-linux-musl/release/forevervm
 
   build-windows:
     runs-on: ubuntu-latest
