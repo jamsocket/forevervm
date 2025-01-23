@@ -1,10 +1,11 @@
-name: Build and Format Check
+name: Check JavaScript Code
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [ main ]
+    paths:
+      - 'javascript/**'
+      - '.github/workflows/javascript-checks.yml'
 
 jobs:
   build-and-format:
