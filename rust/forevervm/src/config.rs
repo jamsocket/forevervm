@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct Config {
     pub token: Option<ApiToken>,
     pub server_url: Option<Url>,
@@ -21,14 +22,6 @@ impl Config {
     }
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            token: None,
-            server_url: None,
-        }
-    }
-}
 
 pub struct ConfigManager {
     config_path: PathBuf,

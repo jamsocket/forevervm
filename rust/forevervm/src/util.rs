@@ -1,4 +1,5 @@
 use chrono::Duration;
+use std::fmt::Display;
 
 pub enum ApproximateDuration {
     Days(i64),
@@ -7,13 +8,13 @@ pub enum ApproximateDuration {
     Seconds(i64),
 }
 
-impl ApproximateDuration {
-    pub fn to_string(&self) -> String {
+impl Display for ApproximateDuration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ApproximateDuration::Days(days) => format!("{} days", days),
-            ApproximateDuration::Hours(hours) => format!("{} hours", hours),
-            ApproximateDuration::Minutes(minutes) => format!("{} minutes", minutes),
-            ApproximateDuration::Seconds(seconds) => format!("{} seconds", seconds),
+            ApproximateDuration::Days(days) => write!(f, "{} days", days),
+            ApproximateDuration::Hours(hours) => write!(f, "{} hours", hours),
+            ApproximateDuration::Minutes(minutes) => write!(f, "{} minutes", minutes),
+            ApproximateDuration::Seconds(seconds) => write!(f, "{} seconds", seconds),
         }
     }
 }
