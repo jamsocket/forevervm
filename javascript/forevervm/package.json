@@ -1,7 +1,7 @@
 {
   "name": "forevervm",
   "description": "CLI for foreverVM",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "author": "Jamsocket",
   "bin": {
     "forevervm": "./bin/run.js"
