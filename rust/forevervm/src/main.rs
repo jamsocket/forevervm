@@ -1,5 +1,11 @@
 use clap::{Parser, Subcommand};
-use forevervm::{commands::login::login, DEFAULT_SERVER_URL};
+use forevervm::{
+    commands::{
+        auth::{login, whoami},
+        machine::{machine_list, machine_new},
+    },
+    DEFAULT_SERVER_URL,
+};
 use url::Url;
 
 #[derive(Parser)]
@@ -16,6 +22,7 @@ enum Commands {
         #[arg(long, default_value = DEFAULT_SERVER_URL)]
         api_base_url: Url,
     },
+    Whoami,
     /// Machine management commands
     Machine {
         #[command(subcommand)]
@@ -43,25 +50,23 @@ async fn main() {
         Commands::Login { api_base_url } => {
             login(api_base_url).await.unwrap();
         }
-        Commands::Machine { command } => {
-            match command {
-                MachineCommands::New => {
-                    println!("Creating new machine...");
-                    // TODO: Implement machine creation
-                }
-                MachineCommands::List => {
-                    println!("Listing machines...");
-                    // TODO: Implement machine listing
-                }
-                MachineCommands::Repl => {
-                    println!("Starting machine REPL...");
-                    // TODO: Implement machine REPL
-                }
-            }
+        Commands::Whoami => {
+            whoami().await.unwrap();
         }
+        Commands::Machine { command } => match command {
+            MachineCommands::New => {
+                machine_new().await.unwrap();
+            }
+            MachineCommands::List => {
+                machine_list().await.unwrap();
+            }
+            MachineCommands::Repl => {
+                todo!()
+            }
+        },
         Commands::Repl => {
             println!("Starting global REPL...");
-            // TODO: Implement global REPL
+            todo!()
         }
     }
 }

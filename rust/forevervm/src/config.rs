@@ -1,4 +1,4 @@
-use crate::{api::token::ApiToken, DEFAULT_SERVER_URL};
+use crate::{api::token::ApiToken, client::ForeverVMClient, DEFAULT_SERVER_URL};
 use anyhow::{Context, Result};
 use dirs::home_dir;
 use serde::{Deserialize, Serialize};
@@ -43,6 +43,15 @@ impl ConfigManager {
             .join("config.json");
 
         Ok(Self { config_path })
+    }
+
+    pub fn client(&self) -> Result<ForeverVMClient> {
+        let config = self.load()?;
+        if let Some(token) = &config.token {
+            Ok(ForeverVMClient::new(config.server_url()?, token.clone()))
+        } else {
+            Err(anyhow::anyhow!("Not logged in"))
+        }
     }
 
     pub fn load(&self) -> Result<Config> {

@@ -1,9 +1,12 @@
-use crate::{api::{
-    api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
-    http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
-    id_types::{InstructionSeq, MachineName},
-    token::ApiToken,
-}, error::{ClientError, Result}};
+use crate::{
+    api::{
+        api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
+        http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
+        id_types::{InstructionSeq, MachineName},
+        token::ApiToken,
+    },
+    error::{ClientError, Result},
+};
 use repl::ReplConnection;
 use reqwest::{Client, Method, Response, Url};
 use serde::{de::DeserializeOwned, Serialize};
@@ -36,6 +39,10 @@ impl ForeverVMClient {
             token,
             client: Client::new(),
         }
+    }
+
+    pub fn server_url(&self) -> &Url {
+        &self.api_base
     }
 
     pub async fn repl(&self, machine_name: &MachineName) -> Result<ReplConnection> {
