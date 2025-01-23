@@ -1,12 +1,12 @@
-use crate::{api::token::ApiToken, client::ForeverVMClient, DEFAULT_SERVER_URL};
+use crate::DEFAULT_SERVER_URL;
 use anyhow::{Context, Result};
 use dirs::home_dir;
+use forevervm_client::{api::token::ApiToken, client::ForeverVMClient};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use url::Url;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Config {
     pub token: Option<ApiToken>,
     pub server_url: Option<Url>,
@@ -21,7 +21,6 @@ impl Config {
         Ok(DEFAULT_SERVER_URL.parse()?)
     }
 }
-
 
 pub struct ConfigManager {
     config_path: PathBuf,

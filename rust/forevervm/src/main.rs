@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
 use forevervm::{
-    api::id_types::MachineName,
     commands::{
         auth::{login, whoami},
         machine::{machine_list, machine_new},
@@ -8,6 +7,7 @@ use forevervm::{
     },
     DEFAULT_SERVER_URL,
 };
+use forevervm_client::api::id_types::MachineName;
 use url::Url;
 
 #[derive(Parser)]

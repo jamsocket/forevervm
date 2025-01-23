@@ -1,16 +1,15 @@
-use crate::{
-    api::{
-        api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
-        http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
-        id_types::{InstructionSeq, MachineName},
-        token::ApiToken,
-    },
-    error::{ClientError, Result},
+use crate::api::{
+    api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
+    http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
+    id_types::{InstructionSeq, MachineName},
+    token::ApiToken,
 };
+use error::{ClientError, Result};
 use repl::ReplConnection;
 use reqwest::{Client, Method, Response, Url};
 use serde::{de::DeserializeOwned, Serialize};
 
+pub mod error;
 pub mod repl;
 pub mod typed_socket;
 pub mod util;
