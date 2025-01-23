@@ -1,4 +1,4 @@
-from typing import List, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 
 class WhoamiResponse(TypedDict):
@@ -45,3 +45,8 @@ class ExecResponse(TypedDict):
 class ExecResultResponse(TypedDict):
     instruction_id: int
     result: ExecResult
+
+
+class StandardOutput(TypedDict):
+    stream: Literal["stdout"] | Literal["stderr"]
+    data: str
