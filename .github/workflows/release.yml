@@ -141,10 +141,15 @@ jobs:
         target: x86_64-pc-windows-gnu
         override: true
         
-    - name: Install mingw
+    - name: Install requirements
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-mingw-w64 g++-mingw-w64-x86-64
+        sudo apt-get install -y gcc-mingw-w64 g++-mingw-w64-x86-64 nasm
+
+    - name: Set NASM path
+      run: |
+        echo "AWS_LC_SYS_PREBUILT_NASM=false" >> $GITHUB_ENV
+        which nasm
 
     - name: Build for Windows
       uses: actions-rs/cargo@v1
