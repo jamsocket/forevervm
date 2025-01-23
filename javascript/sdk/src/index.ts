@@ -18,7 +18,10 @@ interface ForeverVMOptions {
 export class ForeverVM {
   baseUrl = 'https://api.forevervm.com'
 
-  constructor(private token: string, options: ForeverVMOptions = {}) {
+  constructor(
+    private token: string,
+    options: ForeverVMOptions = {},
+  ) {
     if (options.baseUrl) this.baseUrl = options.baseUrl
   }
 

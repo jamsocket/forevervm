@@ -33,8 +33,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.7",
-    "@types/ws": "^8.5.13",
-    "prettier": "^2.0.0"
+    "@types/ws": "^8.5.13"
   },
   "dependencies": {
     "ws": "^8.18.0"

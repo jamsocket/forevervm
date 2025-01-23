@@ -17,7 +17,7 @@
   "scripts": {
     "build": "exit 0",
     "typecheck": "exit 0",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "check-format": "prettier --check src/**/*.ts"
+    "format": "prettier --write \"src/**/*.js\"",
+    "check-format": "prettier --check src/**/*.js"
   }
 }
