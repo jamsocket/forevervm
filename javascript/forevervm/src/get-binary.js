@@ -32,7 +32,9 @@ async function downloadFile(url, filePath) {
     throw new Error(`Error downloading ${url}: server returned ${res.status}`)
   }
 
-  await pipeline(res.body, zlib.createGunzip(), fs.createWriteStream(filePath, { mode: 0o770 }))
+  const handle = await fs.open(filePath, 'w', 0o770)
+  await pipeline(res.body, zlib.createGunzip(), handle.createWriteStream())
+  await handle.close()
 
   return filePath
 }
