@@ -1,7 +1,7 @@
 use crate::DEFAULT_SERVER_URL;
 use anyhow::{Context, Result};
 use dirs::home_dir;
-use forevervm_client::{api::token::ApiToken, client::ForeverVMClient};
+use forevervm_sdk::{api::token::ApiToken, client::ForeverVMClient};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use url::Url;

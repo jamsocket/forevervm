@@ -7,7 +7,7 @@ use forevervm::{
     },
     DEFAULT_SERVER_URL,
 };
-use forevervm_client::api::id_types::MachineName;
+use forevervm_sdk::api::id_types::MachineName;
 use url::Url;
 
 #[derive(Parser)]
