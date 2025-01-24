@@ -23,9 +23,9 @@ class SemverVersion {
   bump(type: 'major' | 'minor' | 'patch') {
     switch (type) {
       case 'major':
-        return new SemverVersion(this.major + 1, this.minor, this.patch)
+        return new SemverVersion(this.major + 1, 0, 0)
       case 'minor':
-        return new SemverVersion(this.major, this.minor + 1, this.patch)
+        return new SemverVersion(this.major, this.minor + 1, 0)
       case 'patch':
         return new SemverVersion(this.major, this.minor, this.patch + 1)
       default:
