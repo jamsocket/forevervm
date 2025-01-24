@@ -129,7 +129,7 @@ if (import.meta.vitest) {
     const { machine_name } = await fvm.createMachine()
     const { instruction_seq } = await fvm.exec('print(123) or 567', machine_name)
     expect(instruction_seq).toBe(0)
-    const result = await fvm.execResult(machine_name, instruction_seq!!!)
+    const result = await fvm.execResult(machine_name, instruction_seq as number)
     expect(result.result.value).toBe('567')
   })
 }
