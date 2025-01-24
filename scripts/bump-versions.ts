@@ -121,7 +121,6 @@ class NpmPackageRepo implements PackageRepo {
   }
 
   updateVersion(path: string, version: SemverVersion): void {
-    console.log(`Updating ${path} to ${version}`)
     const content = fs.readFileSync(path, 'utf-8')
     const pkg = JSON.parse(content)
     pkg.version = version.toString()
@@ -186,7 +185,6 @@ class PythonPackageRepo implements PackageRepo {
   }
 
   updateVersion(path: string, version: SemverVersion): void {
-    console.log(`Updating ${path} to ${version}`)
     const content = fs.readFileSync(path, 'utf-8')
     const newContent = content.replace(/version\s*=\s*"[^"]*"/, `version = "${version}"`)
     if (content === newContent) {
@@ -260,7 +258,6 @@ class CargoPackageRepo implements PackageRepo {
   }
 
   updateVersion(path: string, version: SemverVersion): void {
-    console.log(`Updating ${path} to ${version}`)
     const content = fs.readFileSync(path, 'utf-8')
     const newContent = content.replace(/version\s*=\s*"[^"]*"/, `version = "${version}"`)
     if (content === newContent) {
@@ -361,13 +358,19 @@ async function main() {
       }
 
       for (const item of plan) {
+        console.log('Plan:')
         console.log(
           `${chalk.blue(item.package.repo.repoName)} ${chalk.cyan(item.package.name)}: ${chalk.red(item.from)} ${chalk.gray('->')} ${chalk.green(item.to)}`,
         )
       }
 
-      if (!dryRun) {
+      if (dryRun) {
+        console.log('Dry run; no changes will be made.')
+      } else {
         for (const item of plan) {
+          console.log(
+            `Updating ${chalk.blue(item.package.repo.repoName)} ${chalk.cyan(item.package.name)}: ${chalk.red(item.from)} ${chalk.gray('->')} ${chalk.green(item.to)}`,
+          )
           item.package.repo.updateVersion(item.package.path, item.to)
         }
       }
