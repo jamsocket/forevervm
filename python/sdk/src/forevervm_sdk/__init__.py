@@ -136,5 +136,7 @@ class ForeverVM:
             type=ExecResultResponse,
         )
 
-    def repl(self, machine_name="new"):
-        return Repl(token=self._token, machine_name=machine_name)
+    def repl(self, machine_name="new") -> Repl:
+        return Repl(
+            token=self._token, machine_name=machine_name, base_url=self._base_url
+        )

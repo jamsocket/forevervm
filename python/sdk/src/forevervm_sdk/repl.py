@@ -1,5 +1,6 @@
 from collections import deque
 from warnings import warn
+import re
 
 import httpx
 from httpx_ws import WebSocketSession, connect_ws
@@ -84,8 +85,11 @@ class Repl:
         base_url=API_BASE_URL,
     ):
         client = httpx.Client(headers={"authorization": f"Bearer {token}"})
+
+        base_url = re.sub(r"^http(s)?://", r"ws\1://", base_url)
+
         self._connection = connect_ws(
-            f"{API_BASE_URL}/v1/machine/{machine_name}/repl", client
+            f"{base_url}/v1/machine/{machine_name}/repl", client
         )
         self._ws = self._connection.__enter__()
 
@@ -98,7 +102,7 @@ class Repl:
     def __exit__(self, type, value, traceback):
         self._connection.__exit__(type, value, traceback)
 
-    def exec(self, code: str):
+    def exec(self, code: str) -> ReplExecResult:
         if self._instruction is not None and self._instruction._result is None:
             raise ReplException("Instruction already running")
 
