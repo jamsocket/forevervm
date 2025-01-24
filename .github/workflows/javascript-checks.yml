@@ -36,3 +36,31 @@ jobs:
 
       - name: Check Types
         run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    environment: tests
+
+    defaults:
+      run:
+        working-directory: javascript
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: javascript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        working-directory: javascript/sdk
+        env:
+          FOREVERVM_API_BASE: ${{ secrets.FOREVERVM_API_BASE }}
+          FOREVERVM_TOKEN: ${{ secrets.FOREVERVM_TOKEN }}
+        run: npm test
