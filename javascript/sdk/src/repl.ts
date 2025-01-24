@@ -1,5 +1,7 @@
+import type { WebSocket as NodeWebSocket } from 'ws'
+
 import type { ExecResponse } from './types'
-import type WebSocket from './ws'
+import { websocket } from './ws'
 
 export interface ExecOptions {
   timeoutSeconds?: number
@@ -8,7 +10,6 @@ export interface ExecOptions {
 
 export interface Instruction {
   code: string
-  max_duration_seconds?: number
   timeout_seconds?: number
 }
 
@@ -46,34 +47,77 @@ export type MessageFromServer =
       id: string
     }
 
-export class Repl {
-  private ws: WebSocket
-  private listener = new EventTarget()
-  private nextRequestId = 0
+interface ReplOptions {
+  baseUrl?: string
+  token?: string
+}
 
-  constructor(ws: WebSocket) {
-    this.ws = ws
-    this.ws.addEventListener('message', ({ data }) => {
-      const msg = JSON.parse(data.toString())
-      this.listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
-    })
+let createWebsocket = websocket
+
+export class Repl {
+  #baseUrl = 'wss://api.forevervm.com'
+  #token = process.env.FOREVERVM_TOKEN || ''
+  #machine = ''
+
+  #ws: WebSocket | NodeWebSocket
+  #listener = new EventTarget()
+  #queued: MessageToServer | undefined
+  #nextRequestId = 0
+
+  constructor(machine?: string, options?: ReplOptions)
+  constructor(options?: ReplOptions)
+  constructor(machine?: string | ReplOptions, options?: ReplOptions) {
+    const opts = (typeof machine === 'string' ? options : machine) ?? {}
+    const mach = typeof machine === 'string' ? machine : 'new'
+
+    this.#machine = mach
+    if (opts.token) this.#token = opts.token
+    if (opts.baseUrl) this.#baseUrl = opts.baseUrl
+
+    if (!this.#token) {
+      throw new Error(
+        'foreverVM token must be supplied as either `options.token` or the environment variable `FOREVERVM_TOKEN`.',
+      )
+    }
+
+    this.#ws = this.#connect()
   }
 
-  private send(message: MessageToServer) {
-    this.ws.send(JSON.stringify(message))
+  #connect() {
+    const url = `${this.#baseUrl}/v1/machine/${this.#machine}/repl`
+
+    this.#ws = createWebsocket(url, this.#token)
+    this.#ws.addEventListener('open', () => {
+      const queued = this.#queued
+      this.#queued = undefined
+      if (queued) this.#send(queued)
+    })
+    this.#ws.addEventListener('close', () => this.#connect())
+    this.#ws.addEventListener('error', () => this.#connect())
+    this.#ws.addEventListener('message', ({ data }) => {
+      const msg = JSON.parse(data.toString())
+      console.log(msg)
+      this.#listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
+    })
+    return this.#ws
+  }
+
+  #send(message: MessageToServer) {
+    if (this.connected) this.#ws.send(JSON.stringify(message))
+    else this.#queued = message
+  }
+
+  get connected() {
+    return this.#ws.readyState === this.#ws.OPEN
   }
 
   exec(code: string, options: ExecOptions = {}): ReplExecResult {
-    const request_id = this.nextRequestId++
-    const instruction = {
-      code,
-      max_runtime_ms: options.timeoutSeconds,
-      timeout_seconds: options.timeoutSeconds,
-    }
+    const request_id = this.#nextRequestId++
+    const instruction = { code, timeout_seconds: options.timeoutSeconds }
 
-    this.send({ type: 'exec', instruction, request_id })
-    this.listener = new EventTarget()
-    return new ReplExecResult(request_id, this.listener)
+    this.#send({ type: 'exec', instruction, request_id })
+    this.#listener = new EventTarget()
+    return new ReplExecResult(request_id, this.#listener)
   }
 }
 
@@ -172,35 +216,37 @@ export class ReplExecResult {
 }
 
 if (import.meta.vitest) {
-  const { test, expect } = import.meta.vitest
+  const { test, expect, beforeAll } = import.meta.vitest
 
-  const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
   const FOREVERVM_TOKEN = process.env.FOREVERVM_TOKEN || ''
+  const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
 
-  async function websocket() {
-    const { default: WebSocket } = await import('ws')
-    const ws = new WebSocket(`${FOREVERVM_API_BASE.replace(/^http/, 'ws')}/v1/machine/new/repl`, {
-      headers: { Authorization: `Bearer ${FOREVERVM_TOKEN}` },
-    } as any)
+  let ws: WebSocket | NodeWebSocket
+  beforeAll(() => {
+    createWebsocket = (url: string, token: string) => {
+      ws = websocket(url, token)
+      return ws
+    }
+  })
 
-    await new Promise((resolve, reject) => {
-      ws.addEventListener('open', resolve)
-      ws.addEventListener('error', reject)
-    })
-
-    return ws
-  }
-
-  test('return value', async () => {
-    const repl = new Repl(await websocket())
+  test.sequential('explicit token', async () => {
+    const repl = new Repl({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
 
     const { value, error } = await repl.exec('1 + 1').result
     expect(value).toBe('2')
     expect(error).toBeUndefined()
   })
 
-  test('output', async () => {
-    const repl = new Repl(await websocket())
+  test.sequential('return value', async () => {
+    const repl = new Repl({ baseUrl: FOREVERVM_API_BASE })
+
+    const { value, error } = await repl.exec('1 + 1').result
+    expect(value).toBe('2')
+    expect(error).toBeUndefined()
+  })
+
+  test.sequential('output', async () => {
+    const repl = new Repl({ baseUrl: FOREVERVM_API_BASE })
 
     const { value, error } = await repl.exec('1 + 1').result
     expect(value).toBe('2')
@@ -217,5 +263,17 @@ if (import.meta.vitest) {
 
     const { done } = await output[Symbol.asyncIterator]().next()
     expect(done).toBe(true)
+  })
+
+  test.sequential('reconnect', async () => {
+    const repl = new Repl({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+
+    await repl.exec('1 + 1').result
+
+    ws.close()
+
+    const { value, error } = await repl.exec('1 + 1').result
+    expect(value).toBe('2')
+    expect(error).toBeUndefined()
   })
 }

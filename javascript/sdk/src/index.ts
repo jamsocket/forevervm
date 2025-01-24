@@ -6,7 +6,6 @@ import type {
   ListMachinesResponse,
   WhoamiResponse,
 } from './types'
-import WebSocket from './ws'
 
 export * from './types'
 export * from './repl'
@@ -16,19 +15,18 @@ interface ForeverVMOptions {
 }
 
 export class ForeverVM {
-  baseUrl = 'https://api.forevervm.com'
+  #token = process.env.FOREVERVM_TOKEN || ''
+  #baseUrl = 'https://api.forevervm.com'
 
-  constructor(
-    private token: string,
-    options: ForeverVMOptions = {},
-  ) {
-    if (options.baseUrl) this.baseUrl = options.baseUrl
+  constructor(token: string, options: ForeverVMOptions = {}) {
+    this.#token = token
+    if (options.baseUrl) this.#baseUrl = options.baseUrl
   }
 
-  private async getRequest(path: string) {
-    const response = await fetch(`${this.baseUrl}${path}`, {
+  async #get(path: string) {
+    const response = await fetch(`${this.#baseUrl}${path}`, {
       headers: {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.#token}`,
       },
     })
     if (!response.ok) {
@@ -37,12 +35,12 @@ export class ForeverVM {
     return await response.json()
   }
 
-  private async postRequest(path: string, body?: object) {
-    const response = await fetch(`${this.baseUrl}${path}`, {
+  async #post(path: string, body?: object) {
+    const response = await fetch(`${this.#baseUrl}${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.#token}`,
       },
       body: body ? JSON.stringify(body) : undefined,
     })
@@ -53,15 +51,15 @@ export class ForeverVM {
   }
 
   async whoami(): Promise<WhoamiResponse> {
-    return await this.getRequest('/v1/whoami')
+    return await this.#get('/v1/whoami')
   }
 
   async createMachine(): Promise<CreateMachineResponse> {
-    return await this.postRequest('/v1/machine/new')
+    return await this.#post('/v1/machine/new')
   }
 
   async listMachines(): Promise<ListMachinesResponse> {
-    return await this.getRequest('/v1/machine/list')
+    return await this.#get('/v1/machine/list')
   }
 
   async exec(
@@ -74,28 +72,20 @@ export class ForeverVM {
       machineName = createResponse.machine_name
     }
 
-    return await this.postRequest(`/v1/machine/${machineName}/exec`, {
+    return await this.#post(`/v1/machine/${machineName}/exec`, {
       instruction: { code },
       interrupt,
     })
   }
 
   async execResult(machineName: string, instructionSeq: number): Promise<ApiExecResponseResult> {
-    return await this.getRequest(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
+    return await this.#get(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
   }
 
-  async repl(machineName = 'new'): Promise<Repl> {
-    return new Promise<Repl>((resolve, reject) => {
-      const ws = new WebSocket(
-        `${this.baseUrl.replace(/^http/, 'ws')}/v1/machine/${machineName}/repl`,
-        { headers: { Authorization: `Bearer ${this.token}` } } as any,
-      )
-
-      ws.addEventListener('open', () => {
-        resolve(new Repl(ws))
-      })
-
-      ws.addEventListener('error', reject)
+  async repl(machineName?: string): Promise<Repl> {
+    return new Repl(machineName, {
+      token: this.#token,
+      baseUrl: this.#baseUrl.replace(/^http/, 'ws'),
     })
   }
 }
