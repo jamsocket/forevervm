@@ -13,4 +13,5 @@ readme = "README.md"
 dev = [
     "build>=1.2.2.post1",
     "pytest>=8.3.4",
+    "twine>=6.1.0",
 ]
