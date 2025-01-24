@@ -1,4 +1,3 @@
-import { beforeAll } from 'vitest'
 import type { ExecResponse } from './types'
 import type WebSocket from './ws'
 
@@ -115,7 +114,7 @@ export class ReplExecResult {
             const value = this.#buffer.shift()
             if (value) return { value, done: false }
 
-            if (this.#done) return { value: void 0, done: true }
+            if (this.#done) return { value: undefined, done: true }
 
             const { promise, resolve } = Promise.withResolvers<void>()
             this.#advance = resolve
