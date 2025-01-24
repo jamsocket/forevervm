@@ -8,10 +8,3 @@ version = "0.1.12"
 dependencies = ["httpx >= 0.28.1", "httpx-ws >= 0.7.1"]
 description = "Developer SDK for foreverVM"
 readme = "README.md"
-
-[dependency-groups]
-dev = [
-    "build>=1.2.2.post1",
-    "pytest>=8.3.4",
-    "twine>=6.1.0",
-]
