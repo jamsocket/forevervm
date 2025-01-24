@@ -21,3 +21,6 @@ tokio-tungstenite = { version = "0.26.1", features = ["rustls-tls-webpki-roots"]
 tracing = "0.1.41"
 tungstenite = "0.26.1"
 url = "2.5.4"
+
+[dev-dependencies]
+tokio = { version = "1.43.0", features = ["macros"] }
