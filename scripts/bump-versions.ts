@@ -123,11 +123,9 @@ class NpmPackageRepo implements PackageRepo {
   updateVersion(path: string, version: SemverVersion): void {
     console.log(`Updating ${path} to ${version}`)
     const content = fs.readFileSync(path, 'utf-8')
-    const newContent = content.replace(/version\s*=\s*"[^"]*"/, `version = "${version}"`)
-    if (content === newContent) {
-      throw new Error(`Failed to update version in ${path}`)
-    }
-    fs.writeFileSync(path, newContent)
+    const pkg = JSON.parse(content)
+    pkg.version = version.toString()
+    fs.writeFileSync(path, JSON.stringify(pkg, null, 2))
   }
 }
 
