@@ -67,6 +67,7 @@ export class Repl {
   #listener = new EventTarget()
   #queued: MessageToServer | undefined
   #nextRequestId = 0
+  #retries = 0
 
   constructor(machine?: string, options?: ReplOptions)
   constructor(options?: ReplOptions)
@@ -88,23 +89,40 @@ export class Repl {
   }
 
   #connect() {
+    if (this.#ws && this.#ws.readyState !== WebSocket.CLOSED) return this.#ws
+
     const url = `${this.#baseUrl}/v1/machine/${this.#machine}/repl`
 
     this.#ws = createWebsocket(url, this.#token)
     this.#ws.addEventListener('open', () => {
+      this.#retries = 0
+
       const queued = this.#queued
       this.#queued = undefined
       if (queued) this.#send(queued)
     })
-    this.#ws.addEventListener('close', () => this.#connect())
-    this.#ws.addEventListener('error', () => this.#connect())
+
+    this.#ws.addEventListener('close', () => this.#reconnect())
+    this.#ws.addEventListener('error', () => this.#reconnect())
     this.#ws.addEventListener('message', ({ data }) => {
       const msg = JSON.parse(data.toString()) as MessageFromServer
       if (msg.type === 'connected') this.#machine = msg.machine_name
 
       this.#listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
     })
+
     return this.#ws
+  }
+
+  async #reconnect() {
+    if (this.connecting) return
+    if (this.#retries > 0) {
+      const wait = 2 ** (this.#retries - 1)
+      await new Promise((resolve) => setTimeout(resolve, wait))
+    }
+
+    this.#retries += 1
+    this.#connect()
   }
 
   #send(message: MessageToServer) {
@@ -113,7 +131,11 @@ export class Repl {
   }
 
   get connected() {
-    return this.#ws.readyState === this.#ws.OPEN
+    return this.#ws?.readyState === WebSocket.OPEN
+  }
+
+  get connecting() {
+    return this.#ws?.readyState === WebSocket.CONNECTING
   }
 
   exec(code: string, options: ExecOptions = {}): ReplExecResult {
