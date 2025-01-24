@@ -30,4 +30,7 @@ jobs:
         
     - name: Run tests
       working-directory: python/sdk
+      env:
+        FOREVERVM_API_BASE: ${{ secrets.FOREVERVM_API_BASE }}
+        FOREVERVM_TOKEN: ${{ secrets.FOREVERVM_TOKEN }}
       run: uv run pytest tests/
