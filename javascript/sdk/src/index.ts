@@ -124,10 +124,10 @@ if (import.meta.vitest) {
     expect(found).toBeDefined()
   })
 
-  test('exec and execResult', async () => {
+  test('exec and execResult', { timeout: 20_000 }, async () => {
     const fvm = new ForeverVM(FOREVERVM_TOKEN, { baseUrl: FOREVERVM_API_BASE })
     const { machine_name } = await fvm.createMachine()
-    const { instruction_seq } = await fvm.exec('print(123) or 567')
+    const { instruction_seq } = await fvm.exec('print(123) or 567', machine_name)
     expect(instruction_seq).toBe(0)
     const result = await fvm.execResult(machine_name, instruction_seq!!!)
     expect(result.result.value).toBe('567')
