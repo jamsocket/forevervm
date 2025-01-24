@@ -22,6 +22,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --clean --dts --sourcemap",
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
     "format": "prettier --write \"src/**/*.ts\"",
     "check-format": "prettier --check src/**/*.ts"
   },

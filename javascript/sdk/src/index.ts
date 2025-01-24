@@ -64,7 +64,7 @@ export class ForeverVM {
     return await this.getRequest('/v1/machine/list')
   }
 
-  async execMachine(
+  async exec(
     code: string,
     machineName?: string,
     interrupt: boolean = false,
@@ -75,9 +75,7 @@ export class ForeverVM {
     }
 
     return await this.postRequest(`/v1/machine/${machineName}/exec`, {
-      instruction: {
-        code,
-      },
+      instruction: { code },
       interrupt,
     })
   }
@@ -100,4 +98,38 @@ export class ForeverVM {
       ws.addEventListener('error', reject)
     })
   }
+}
+
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+
+  const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
+  const FOREVERVM_TOKEN = process.env.FOREVERVM_TOKEN || ''
+
+  test('whoami', async () => {
+    const fvm = new ForeverVM(FOREVERVM_TOKEN, { baseUrl: FOREVERVM_API_BASE })
+
+    const whoami = await fvm.whoami()
+    expect(whoami.account).toBeDefined()
+  })
+
+  test('createMachine and listMachines', async () => {
+    const fvm = new ForeverVM(FOREVERVM_TOKEN, { baseUrl: FOREVERVM_API_BASE })
+
+    const machine = await fvm.createMachine()
+    expect(machine.machine_name).toBeDefined()
+
+    const machines = await fvm.listMachines()
+    const found = machines.machines.find(({ name }) => name === machine.machine_name)
+    expect(found).toBeDefined()
+  })
+
+  test('exec and execResult', async () => {
+    const fvm = new ForeverVM(FOREVERVM_TOKEN, { baseUrl: FOREVERVM_API_BASE })
+    const { machine_name } = await fvm.createMachine()
+    const { instruction_seq } = await fvm.exec('print(123) or 567')
+    expect(instruction_seq).toBe(0)
+    const result = await fvm.execResult(machine_name, instruction_seq!!!)
+    expect(result.result.value).toBe('567')
+  })
 }
