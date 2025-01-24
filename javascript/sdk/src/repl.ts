@@ -90,8 +90,8 @@ export class ReplExecResult {
 
   // result state
   #done = false
-  #resolve: (response: ExecResponse) => void
-  #reject: (reason: any) => void
+  #resolve: (response: ExecResponse) => void = () => {}
+  #reject: (reason: any) => void = () => {}
 
   result: Promise<ExecResponse>
 
@@ -100,10 +100,10 @@ export class ReplExecResult {
     this.#listener = listener
     this.#listener.addEventListener('msg', this)
 
-    const { promise, resolve, reject } = Promise.withResolvers<ExecResponse>()
-    this.result = promise
-    this.#resolve = resolve
-    this.#reject = reject
+    this.result = new Promise<ExecResponse>((resolve, reject) => {
+      this.#resolve = resolve
+      this.#reject = reject
+    })
   }
 
   get output(): { [Symbol.asyncIterator](): AsyncIterator<StandardOutput, void, unknown> } {
@@ -116,9 +116,9 @@ export class ReplExecResult {
 
             if (this.#done) return { value: undefined, done: true }
 
-            const { promise, resolve } = Promise.withResolvers<void>()
-            this.#advance = resolve
-            await promise
+            await new Promise<void>((resolve) => {
+              this.#advance = resolve
+            })
           }
         },
       }),
