@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "forevervm"
-version = "0.1.12-dev2"
+version = "0.1.12"
 
 [project.scripts]
 forevervm = "forevervm:run_binary"

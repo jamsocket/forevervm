@@ -13,10 +13,10 @@ from importlib.metadata import version
 
 def get_suffix(os_type, os_arch):
     suffixes = {
-        ("win32", "x64"): "win-x64.exe.gz",
-        ("linux", "x64"): "linux-x64.gz",
+        ("win32", "x86_64"): "win-x64.exe.gz",
+        ("linux", "x86_64"): "linux-x64.gz",
         ("linux", "arm64"): "linux-arm64.gz",
-        ("darwin", "x64"): "macos-x64.gz",
+        ("darwin", "x86_64"): "macos-x64.gz",
         ("darwin", "arm64"): "macos-arm64.gz",
     }
 
