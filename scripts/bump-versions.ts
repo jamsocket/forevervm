@@ -357,8 +357,8 @@ async function main() {
         }
       }
 
+      console.log('Plan:')
       for (const item of plan) {
-        console.log('Plan:')
         console.log(
           `${chalk.blue(item.package.repo.repoName)} ${chalk.cyan(item.package.name)}: ${chalk.red(item.from)} ${chalk.gray('->')} ${chalk.green(item.to)}`,
         )
