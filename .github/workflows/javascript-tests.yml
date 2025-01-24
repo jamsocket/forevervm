@@ -1,15 +1,17 @@
-name: JavaScript Checks
+name: JavaScript Tests
 
 on:
-  pull_request:
-    branches: [ main ]
+  push:
     paths:
-      - 'javascript/**'
-      - '.github/workflows/javascript-checks.yml'
+      - 'javascript/sdk/**'
+  pull_request:
+    paths:
+      - 'javascript/sdk/**'
 
 jobs:
-  build-and-format:
+  test:
     runs-on: ubuntu-latest
+    environment: tests
 
     defaults:
       run:
@@ -28,11 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Format
-        run: npm run check-format
-
-      - name: Check Types
-        run: npm run typecheck
+      - name: Run tests
+        working-directory: javascript/sdk
+        env:
+          FOREVERVM_API_BASE: ${{ secrets.FOREVERVM_API_BASE }}
+          FOREVERVM_TOKEN: ${{ secrets.FOREVERVM_TOKEN }}
+        run: npm test
