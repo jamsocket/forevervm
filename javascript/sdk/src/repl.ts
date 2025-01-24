@@ -27,6 +27,10 @@ export type StandardOutput = {
 
 export type MessageFromServer =
   | {
+      type: 'connected'
+      machine_name: string
+    }
+  | {
       type: 'exec_received'
       seq: number // TODO: rename to instruction_id
       request_id: number
@@ -95,8 +99,9 @@ export class Repl {
     this.#ws.addEventListener('close', () => this.#connect())
     this.#ws.addEventListener('error', () => this.#connect())
     this.#ws.addEventListener('message', ({ data }) => {
-      const msg = JSON.parse(data.toString())
-      console.log(msg)
+      const msg = JSON.parse(data.toString()) as MessageFromServer
+      if (msg.type === 'connected') this.#machine = msg.machine_name
+
       this.#listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
     })
     return this.#ws
