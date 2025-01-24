@@ -87,7 +87,7 @@ class NpmPackageRepo implements PackageRepo {
                     const pkg = JSON.parse(content)
                     packages.push({
                         repo: this,
-                        path: path.relative(jsDir, dir),
+                        path: fullPath,
                         name: pkg.name,
                         currentVersion: pkg.version && SemverVersion.parse(pkg.version),
                         private: pkg.private || false,
@@ -118,12 +118,12 @@ class NpmPackageRepo implements PackageRepo {
         }
     }
 
-    updateVersion(packagePath: string, version: SemverVersion): void {
-        packagePath = path.join(__dirname, '..', 'javascript', packagePath)
-        const content = fs.readFileSync(packagePath, 'utf-8')
+    updateVersion(path: string, version: SemverVersion): void {
+        console.log(`Updating ${path} to ${version}`)
+        const content = fs.readFileSync(path, 'utf-8')
         const pkg = JSON.parse(content)
         pkg.version = version.toString()
-        fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2))
+        fs.writeFileSync(path, JSON.stringify(pkg, null, 2))
     }
 }
 
@@ -151,7 +151,7 @@ class PythonPackageRepo implements PackageRepo {
                     if (projectData?.name && projectData?.version) {
                         packages.push({
                             repo: this,
-                            path: path.relative(pythonDir, dir),
+                            path: fullPath,
                             name: projectData.name,
                             currentVersion: projectData.version && SemverVersion.parse(projectData.version),
                             private: false, // Note: implement this if we need private packages
@@ -183,13 +183,12 @@ class PythonPackageRepo implements PackageRepo {
         }
     }
 
-    updateVersion(packagePath: string, version: SemverVersion): void {
-        packagePath = path.join(__dirname, '..', 'python', packagePath)
-        const tomlPath = path.join(packagePath, 'pyproject.toml')
-        const content = fs.readFileSync(tomlPath, 'utf-8')
+    updateVersion(path: string, version: SemverVersion): void {
+        console.log(`Updating ${path} to ${version}`)
+        const content = fs.readFileSync(path, 'utf-8')
         const parsed = TOML.parse(content) as any
         parsed.project.version = version.toString()
-        fs.writeFileSync(tomlPath, TOML.stringify(parsed))
+        fs.writeFileSync(path, TOML.stringify(parsed))
     }
 }
 
@@ -256,13 +255,12 @@ class CargoPackageRepo implements PackageRepo {
         }
     }
 
-    updateVersion(packagePath: string, version: SemverVersion): void {
-        packagePath = path.join(__dirname, '..', 'rust', packagePath)
-        const tomlPath = path.join(packagePath, 'Cargo.toml')
-        const content = fs.readFileSync(tomlPath, 'utf-8')
+    updateVersion(path: string, version: SemverVersion): void {
+        console.log(`Updating ${path} to ${version}`)
+        const content = fs.readFileSync(path, 'utf-8')
         const parsed = TOML.parse(content) as any
         parsed.package.version = version.toString()
-        fs.writeFileSync(tomlPath, TOML.stringify(parsed))
+        fs.writeFileSync(path, TOML.stringify(parsed))
     }
 }
 
