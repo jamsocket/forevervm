@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "forevervm-sdk"
 version = "0.1.12"
@@ -7,5 +11,6 @@ readme = "README.md"
 
 [dependency-groups]
 dev = [
+    "build>=1.2.2.post1",
     "pytest>=8.3.4",
 ]

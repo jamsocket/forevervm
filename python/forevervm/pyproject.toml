@@ -1,6 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "forevervm"
 version = "0.1.12"
 
 [project.scripts]
 forevervm = "forevervm:run_binary"
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
+]
