@@ -124,7 +124,7 @@ class NpmPackageRepo implements PackageRepo {
     const content = fs.readFileSync(path, 'utf-8')
     const pkg = JSON.parse(content)
     pkg.version = version.toString()
-    fs.writeFileSync(path, JSON.stringify(pkg, null, 2))
+    fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n')
   }
 }
 
