@@ -5,7 +5,7 @@ import re
 import httpx
 from httpx_ws import WebSocketSession, connect_ws
 
-from . import API_BASE_URL
+from .config import API_BASE_URL
 from .types import ExecResult, StandardOutput
 
 
