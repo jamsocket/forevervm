@@ -20,7 +20,7 @@ jobs:
     
     - name: Create virtual environment
       working-directory: python/sdk
-      run: uv venv venv
+      run: uv venv
     
     - name: Install dependencies
       working-directory: python/sdk
