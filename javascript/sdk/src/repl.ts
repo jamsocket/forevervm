@@ -90,34 +90,35 @@ export class ReplExecResult {
 
   // result state
   #done = false
-  #resolve: (response: ExecResponse) => void
-  #reject: (reason: any) => void
+  #resolve: (response: ExecResponse) => void = () => {}
+  #reject: (reason: any) => void = () => {}
 
   result: Promise<ExecResponse>
-  output: AsyncIterable<StandardOutput, undefined>
 
   constructor(requestId: number, listener: EventTarget) {
     this.#requestId = requestId
     this.#listener = listener
     this.#listener.addEventListener('msg', this)
 
-    const { promise, resolve, reject } = Promise.withResolvers<ExecResponse>()
-    this.result = promise
-    this.#resolve = resolve
-    this.#reject = reject
+    this.result = new Promise<ExecResponse>((resolve, reject) => {
+      this.#resolve = resolve
+      this.#reject = reject
+    })
+  }
 
-    this.output = {
+  get output(): { [Symbol.asyncIterator](): AsyncIterator<StandardOutput, void, unknown> } {
+    return {
       [Symbol.asyncIterator]: () => ({
         next: async () => {
           while (true) {
             const value = this.#buffer.shift()
             if (value) return { value, done: false }
 
-            if (this.#done) return { done: true }
+            if (this.#done) return { value: undefined, done: true }
 
-            const { promise, resolve } = Promise.withResolvers<void>()
-            this.#advance = resolve
-            await promise
+            await new Promise<void>((resolve) => {
+              this.#advance = resolve
+            })
           }
         },
       }),
@@ -168,4 +169,53 @@ export class ReplExecResult {
         this.#reject(new Error(msg.code))
     }
   }
+}
+
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+
+  const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
+  const FOREVERVM_TOKEN = process.env.FOREVERVM_TOKEN || ''
+
+  async function websocket() {
+    const { default: WebSocket } = await import('ws')
+    const ws = new WebSocket(`${FOREVERVM_API_BASE.replace(/^http/, 'ws')}/v1/machine/new/repl`, {
+      headers: { Authorization: `Bearer ${FOREVERVM_TOKEN}` },
+    } as any)
+
+    await new Promise((resolve, reject) => {
+      ws.addEventListener('open', resolve)
+      ws.addEventListener('error', reject)
+    })
+
+    return ws
+  }
+
+  test('return value', async () => {
+    const repl = new Repl(await websocket())
+
+    const { value, error } = await repl.exec('1 + 1').result
+    expect(value).toBe('2')
+    expect(error).toBeUndefined()
+  })
+
+  test('output', async () => {
+    const repl = new Repl(await websocket())
+
+    const { value, error } = await repl.exec('1 + 1').result
+    expect(value).toBe('2')
+    expect(error).toBeUndefined()
+
+    const output = repl.exec('for i in range(5):\n print(i)').output
+    let i = 0
+    for await (const { data, stream, seq } of output) {
+      expect(data).toBe(`${i}`)
+      expect(stream).toBe('stdout')
+      // expect(seq).toBe(i)
+      i += 1
+    }
+
+    const { done } = await output[Symbol.asyncIterator]().next()
+    expect(done).toBe(true)
+  })
 }
