@@ -174,12 +174,12 @@ export class ReplExecResult {
 
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
-  const { default: WebSocket } = await import('ws')
 
   const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
   const FOREVERVM_TOKEN = process.env.FOREVERVM_TOKEN || ''
 
   async function websocket() {
+    const { default: WebSocket } = await import('ws')
     const ws = new WebSocket(`${FOREVERVM_API_BASE.replace(/^http/, 'ws')}/v1/machine/new/repl`, {
       headers: { Authorization: `Bearer ${FOREVERVM_TOKEN}` },
     } as any)

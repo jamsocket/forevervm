@@ -20,7 +20,7 @@
     "./src/ws.js": "./src/ws.browser.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --clean --dts --sourcemap",
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.ts\"",
