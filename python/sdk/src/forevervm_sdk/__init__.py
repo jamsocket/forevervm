@@ -1,6 +1,7 @@
 import httpx
 from typing import Type, cast
 
+from .config import API_BASE_URL
 from .repl import Repl
 from .types import (
     CreateMachineResponse,
@@ -9,9 +10,6 @@ from .types import (
     ListMachinesResponse,
     WhoamiResponse,
 )
-
-
-API_BASE_URL = "https://api.forevervm.com"
 
 
 class ForeverVM:
