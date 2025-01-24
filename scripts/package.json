@@ -1,0 +1,15 @@
+{
+  "name": "forevervm-scripts",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write .",
+    "check-format": "prettier --check ."
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "@types/node": "^22.10.10",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "prettier": "^3.4.2"
+  }
+}
