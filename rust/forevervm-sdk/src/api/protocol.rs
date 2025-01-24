@@ -2,7 +2,7 @@
 
 use super::{
     api_types::{ApiExecResultResponse, Instruction},
-    id_types::{InstructionSeq, MachineOutputSeq, RequestSeq},
+    id_types::{InstructionSeq, MachineName, MachineOutputSeq, RequestSeq},
     ApiErrorResponse,
 };
 use serde::{Deserialize, Serialize};
@@ -27,6 +27,10 @@ pub enum MessageLevel {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum MessageFromServer {
+    Connected {
+        machine_name: MachineName,
+    },
+
     ExecReceived {
         seq: InstructionSeq,
         request_id: RequestSeq,
