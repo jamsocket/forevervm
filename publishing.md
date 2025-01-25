@@ -26,14 +26,14 @@ python:
 
 ```bash
 cd python/forevervm
-uv run python -m build
-uv run python -m twine upload dist/*
+uv build
+uv publish
 ```
 
 ```bash
 cd python/sdk
-uv run python -m build
-uv run python -m twine upload dist/*
+uv build
+uv publish
 ```
 
 rust:
