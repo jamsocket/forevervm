@@ -8,14 +8,15 @@ import shutil
 from pathlib import Path
 import urllib.request
 import urllib.error
+from importlib.metadata import version
 
 
 def get_suffix(os_type, os_arch):
     suffixes = {
-        ("win32", "x64"): "win-x64.exe.gz",
-        ("linux", "x64"): "linux-x64.gz",
+        ("win32", "x86_64"): "win-x64.exe.gz",
+        ("linux", "x86_64"): "linux-x64.gz",
         ("linux", "arm64"): "linux-arm64.gz",
-        ("darwin", "x64"): "macos-x64.gz",
+        ("darwin", "x86_64"): "macos-x64.gz",
         ("darwin", "arm64"): "macos-arm64.gz",
     }
 
@@ -53,18 +54,8 @@ def get_binary():
     if binpath.exists():
         return str(binpath)
 
-    version = ""
-    pyproject = Path(__file__).parent.parent / "pyproject.toml"
-    with open(pyproject) as f:
-        for line in f:
-            if line.startswith("version"):
-                version = line.split("=")[1].strip().strip('"')
-                break
-
-    if not version:
-        raise RuntimeError("No version found in pyproject.toml")
-
-    url = binary_url(version, sys.platform, os.uname().machine)
+    forevervm_version = version("forevervm")
+    url = binary_url(forevervm_version, sys.platform, os.uname().machine)
     download_file(url, binpath)
 
     return str(binpath)

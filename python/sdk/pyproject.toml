@@ -1,7 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "forevervm-sdk"
-version = "0.1.12"
-dependencies = ["httpx >= 0.28.1", "httpx-ws >= 0.7.1"]
+version = "0.1.12-dev1"
+dependencies = [
+    "httpx>=0.28.1",
+    "httpx-ws>=0.7.1",
+]
 description = "Developer SDK for foreverVM"
 readme = "README.md"
 
