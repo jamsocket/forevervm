@@ -83,7 +83,7 @@ export class ForeverVM {
     return await this.#get(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
   }
 
-  async repl(machineName?: string): Promise<Repl> {
+  repl(machineName?: string): Repl {
     return new Repl({
       machine: machineName,
       token: this.#token,
