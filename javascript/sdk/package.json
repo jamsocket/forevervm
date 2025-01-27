@@ -1,6 +1,6 @@
 {
   "name": "@forevervm/sdk",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Developer SDK for foreverVM",
   "type": "module",
   "main": "./dist/index.cjs",
