@@ -15,7 +15,7 @@ def get_suffix(os_type, os_arch):
     suffixes = {
         ("win32", "x86_64"): "win-x64.exe.gz",
         ("linux", "x86_64"): "linux-x64.gz",
-        ("linux", "arm64"): "linux-arm64.gz",
+        ("linux", "aarch64"): "linux-arm64.gz",
         ("darwin", "x86_64"): "macos-x64.gz",
         ("darwin", "arm64"): "macos-arm64.gz",
     }
