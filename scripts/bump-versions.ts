@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as TOML from '@iarna/toml'
 import { Command } from 'commander'
 import chalk from 'chalk'
+import { execSync } from 'child_process'
 
 class SemverVersion {
   constructor(
@@ -125,11 +126,14 @@ class NpmPackageRepo implements PackageRepo {
     }
   }
 
-  updateVersion(path: string, version: SemverVersion): void {
-    const content = fs.readFileSync(path, 'utf-8')
+  updateVersion(packageFilePath: string, version: SemverVersion): void {
+    const content = fs.readFileSync(packageFilePath, 'utf-8')
     const pkg = JSON.parse(content)
     pkg.version = version.toString()
-    fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n')
+    fs.writeFileSync(packageFilePath, JSON.stringify(pkg, null, 2) + '\n')
+
+    // update lockfile by running `npm install`
+    execSync('npm install', { cwd: path.dirname(packageFilePath) })
   }
 }
 
