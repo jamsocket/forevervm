@@ -20,7 +20,12 @@ As the release version, put `vX.Y.Z` where X.Y.Z is the new version. (Note the l
 npm:
 
 ```bash
-cd javascript
+cd javascript/forevervm
+npm publish
+```
+
+```bash
+cd javascript/sdk
 npm publish
 ```
 
