@@ -1,6 +1,6 @@
 [project]
 name = "forevervm-sdk"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = ["httpx >= 0.28.1", "httpx-ws >= 0.7.1"]
 description = "Developer SDK for foreverVM"
 readme = "README.md"
