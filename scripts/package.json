@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "format": "prettier --write .",
+    "bump": "npx tsx bump-versions.ts bump",
     "check-format": "prettier --check ."
   },
   "dependencies": {
