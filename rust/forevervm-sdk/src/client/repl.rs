@@ -160,7 +160,7 @@ fn handle_message(
             return Err(ClientError::ApiError(err));
         }
         MessageFromServer::Connected { machine_name: _ } => {}
-        msg => unimplemented!("message type not implmented: {msg:?}"),
+        msg => tracing::warn!("message type not implmented: {msg:?}"),
     }
 
     Ok(())
