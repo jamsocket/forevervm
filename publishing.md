@@ -1,8 +1,8 @@
 1. Bump versions:
 
 ```bash
-cd scripts
-npx tsx bump-versions.ts bump patch # or minor or major
+npm --prefix scripts i
+npm --prefix scripts run bump patch # or minor or major
 ```
 
 2. Open a PR called "vX.Y.Z" where X.Y.Z is the new version
