@@ -80,6 +80,11 @@ class NpmPackageRepo implements PackageRepo {
       const items = fs.readdirSync(dir)
       for (const item of items) {
         const fullPath = path.join(dir, item)
+
+        if (item === 'node_modules') {
+          continue
+        }
+
         const stat = fs.statSync(fullPath)
 
         if (stat.isDirectory()) {
