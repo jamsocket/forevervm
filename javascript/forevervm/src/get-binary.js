@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { version } from '../package.json'
+import packageJson from '../package.json' with { type: 'json' }
 
 function getSuffix(osType, osArch) {
   if (osType === 'win32' && osArch === 'x64') return 'win-x64.exe.gz'
@@ -41,6 +41,8 @@ async function downloadFile(url, filePath) {
 }
 
 export async function getBinary() {
+  let version = packageJson.version
+
   let bindir = path.normalize(
     path.join(
       os.homedir(),
