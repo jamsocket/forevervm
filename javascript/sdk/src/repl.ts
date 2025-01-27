@@ -302,11 +302,14 @@ if (import.meta.vitest) {
     const repl = new Repl({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
 
     await repl.exec('1 + 1').result
+    const machineName = repl.machineName
 
     ws.close()
 
     const { value, error } = await repl.exec('1 + 1').result
     expect(value).toBe('2')
     expect(error).toBeUndefined()
+
+    expect(repl.machineName).toBe(machineName)
   })
 }
