@@ -31,14 +31,18 @@ npm publish
 
 python:
 
+When prompted for a username, enter `__token__` (you will need a token to publish).
+
 ```bash
 cd python/forevervm
+rm -rf dist
 uv build
 uv publish
 ```
 
 ```bash
 cd python/sdk
+rm -rf dist
 uv build
 uv publish
 ```
