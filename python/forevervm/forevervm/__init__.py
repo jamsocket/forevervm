@@ -47,14 +47,19 @@ def download_file(url, file_path):
 
 
 def get_binary():
-    bindir = Path.home() / ".config" / "forevervm"
+    forevervm_version = version("forevervm")
+    bindir = (
+        Path.home()
+        / ".cache"
+        / "forevervm"
+        / f"{sys.platform}-{os.uname().machine}-{forevervm_version}"
+    )
     bindir.mkdir(parents=True, exist_ok=True)
 
     binpath = bindir / "forevervm"
     if binpath.exists():
         return str(binpath)
 
-    forevervm_version = version("forevervm")
     url = binary_url(forevervm_version, sys.platform, os.uname().machine)
     download_file(url, binpath)
 

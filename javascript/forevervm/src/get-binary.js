@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { version } from '../package.json'
 
 function getSuffix(osType, osArch) {
   if (osType === 'win32' && osArch === 'x64') return 'win-x64.exe.gz'
@@ -40,7 +41,14 @@ async function downloadFile(url, filePath) {
 }
 
 export async function getBinary() {
-  let bindir = path.normalize(path.join(os.homedir(), '.config', 'forevervm'))
+  let bindir = path.normalize(
+    path.join(
+      os.homedir(),
+      '.cache',
+      'forevervm',
+      `${process.platform}-${process.arch}-${version}`,
+    ),
+  )
   await fs.mkdir(bindir, { recursive: true })
 
   let binpath = path.join(bindir, 'forevervm')
@@ -49,10 +57,6 @@ export async function getBinary() {
     await fs.stat(binpath)
     return binpath
   } catch {}
-
-  let pkg = await fs.readFile(path.join(import.meta.dirname, '../package.json'))
-  let { version } = JSON.parse(pkg.toString())
-  console.log(version)
 
   let url = binaryUrl(version, process.platform, process.arch)
   await downloadFile(url, binpath)
