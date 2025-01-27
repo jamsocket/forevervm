@@ -24,7 +24,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.ts\"",
-    "check-format": "prettier --check src/**/*.ts"
+    "check-format": "prettier --check src/**/*.ts",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist",
@@ -37,6 +38,9 @@
     "@types/ws": "^8.5.13"
   },
   "dependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4",
     "ws": "^8.18.0"
   }
 }

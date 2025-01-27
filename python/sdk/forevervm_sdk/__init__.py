@@ -1,5 +1,5 @@
 import httpx
-from typing import Type, cast
+from typing import Type, cast, TypeVar
 
 from .config import API_BASE_URL
 from .repl import Repl
@@ -10,6 +10,8 @@ from .types import (
     ListMachinesResponse,
     WhoamiResponse,
 )
+
+T = TypeVar("T")
 
 
 class ForeverVM:
@@ -38,7 +40,7 @@ class ForeverVM:
             self.__client_async = httpx.AsyncClient()
         return self.__client_async
 
-    def _get[T](self, path: str, type: Type[T]):
+    def _get(self, path: str, type: Type[T]) -> T:
         response = self._client.get(self._url(path), headers=self._headers())
 
         response.raise_for_status()
@@ -46,7 +48,7 @@ class ForeverVM:
         json = response.json()
         return cast(T, json) if type else json
 
-    async def _get_async[T](self, path: str, type: Type[T]):
+    async def _get_async(self, path: str, type: Type[T]) -> T:
         response = await self._client_async.get(
             self._url(path), headers=self._headers()
         )
@@ -56,7 +58,7 @@ class ForeverVM:
         json = response.json()
         return cast(T, json) if type else json
 
-    def _post[T](self, path, type: Type[T], data=None):
+    def _post(self, path, type: Type[T], data=None):
         response = self._client.post(
             self._url(path),
             headers=self._headers(),
@@ -68,7 +70,7 @@ class ForeverVM:
         json = response.json()
         return cast(T, json) if type else json
 
-    async def _post_async[T](self, path, type: Type[T], data=None):
+    async def _post_async(self, path, type: Type[T], data=None):
         response = await self._client_async.post(
             self._url(path),
             headers={"authorization": f"Bearer {self._token}"},

@@ -24,12 +24,22 @@ npm publish
 
 python:
 
-(TODO)
+```bash
+cd python/forevervm
+uv build
+uv publish
+```
+
+```bash
+cd python/sdk
+uv build
+uv publish
+```
 
 rust:
 
 ```bash
 cd rust
 cargo install cargo-workspaces
-cargo workspaces publish
+cargo workspaces publish --from-git
 ```
