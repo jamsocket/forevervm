@@ -159,6 +159,7 @@ fn handle_message(
         MessageFromServer::Error(err) => {
             return Err(ClientError::ApiError(err));
         }
+        MessageFromServer::Connected { machine_name: _ } => {}
         msg => unimplemented!("message type not implmented: {msg:?}"),
     }
 
