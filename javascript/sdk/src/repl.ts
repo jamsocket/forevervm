@@ -61,7 +61,7 @@ let createWebsocket = websocket
 export class Repl {
   #baseUrl = 'wss://api.forevervm.com'
   #token = process.env.FOREVERVM_TOKEN || ''
-  #machine = ''
+  #machine: string | undefined
 
   #ws: WebSocket | NodeWebSocket
   #listener = new EventTarget()
@@ -72,10 +72,9 @@ export class Repl {
   constructor(machine?: string, options?: ReplOptions)
   constructor(options?: ReplOptions)
   constructor(machine?: string | ReplOptions, options?: ReplOptions) {
+    this.#machine = typeof machine === 'string' ? machine : undefined
     const opts = (typeof machine === 'string' ? options : machine) ?? {}
-    const mach = typeof machine === 'string' ? machine : 'new'
 
-    this.#machine = mach
     if (opts.token) this.#token = opts.token
     if (opts.baseUrl) this.#baseUrl = opts.baseUrl
 
@@ -91,7 +90,8 @@ export class Repl {
   #connect() {
     if (this.#ws && this.#ws.readyState !== WebSocket.CLOSED) return this.#ws
 
-    const url = `${this.#baseUrl}/v1/machine/${this.#machine}/repl`
+    const machine = this.#machine || 'new'
+    const url = `${this.#baseUrl}/v1/machine/${machine}/repl`
 
     this.#ws = createWebsocket(url, this.#token)
     this.#ws.addEventListener('open', () => {
@@ -106,7 +106,13 @@ export class Repl {
     this.#ws.addEventListener('error', () => this.#reconnect())
     this.#ws.addEventListener('message', ({ data }) => {
       const msg = JSON.parse(data.toString()) as MessageFromServer
-      if (msg.type === 'connected') this.#machine = msg.machine_name
+      if (msg.type === 'connected') {
+        if (this.#machine && this.#machine !== msg.machine_name) {
+          console.warn(`Expected machine name ${this.#machine} but recevied ${msg.machine_name}`)
+        }
+
+        this.#machine = msg.machine_name
+      }
 
       this.#listener.dispatchEvent(new CustomEvent('msg', { detail: msg }))
     })
@@ -128,6 +134,10 @@ export class Repl {
   #send(message: MessageToServer) {
     if (this.connected) this.#ws.send(JSON.stringify(message))
     else this.#queued = message
+  }
+
+  get machineName() {
+    return this.#machine
   }
 
   get connected() {
@@ -275,16 +285,12 @@ if (import.meta.vitest) {
   test.sequential('output', async () => {
     const repl = new Repl({ baseUrl: FOREVERVM_API_BASE })
 
-    const { value, error } = await repl.exec('1 + 1').result
-    expect(value).toBe('2')
-    expect(error).toBeUndefined()
-
     const output = repl.exec('for i in range(5):\n print(i)').output
     let i = 0
     for await (const { data, stream, seq } of output) {
       expect(data).toBe(`${i}`)
       expect(stream).toBe('stdout')
-      // expect(seq).toBe(i)
+      expect(seq).toBe(i)
       i += 1
     }
 
