@@ -54,6 +54,7 @@ export type MessageFromServer =
 interface ReplOptions {
   baseUrl?: string
   token?: string
+  machine?: string
 }
 
 let createWebsocket = websocket
@@ -61,7 +62,7 @@ let createWebsocket = websocket
 export class Repl {
   #baseUrl = 'wss://api.forevervm.com'
   #token = process.env.FOREVERVM_TOKEN || ''
-  #machine: string | undefined
+  #machine: string | null = null
 
   #ws: WebSocket | NodeWebSocket
   #listener = new EventTarget()
@@ -69,14 +70,10 @@ export class Repl {
   #nextRequestId = 0
   #retries = 0
 
-  constructor(machine?: string, options?: ReplOptions)
-  constructor(options?: ReplOptions)
-  constructor(machine?: string | ReplOptions, options?: ReplOptions) {
-    this.#machine = typeof machine === 'string' ? machine : undefined
-    const opts = (typeof machine === 'string' ? options : machine) ?? {}
-
-    if (opts.token) this.#token = opts.token
-    if (opts.baseUrl) this.#baseUrl = opts.baseUrl
+  constructor(options: ReplOptions = {}) {
+    if (options.token) this.#token = options.token
+    if (options.baseUrl) this.#baseUrl = options.baseUrl
+    if (options.machine) this.#machine = options.machine
 
     if (!this.#token) {
       throw new Error(
