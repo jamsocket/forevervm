@@ -95,6 +95,7 @@ async fn test_repl() {
         .repl(&machine.machine_name)
         .await
         .expect("failed to create REPL");
+    assert_eq!(repl.machine_name, machine.machine_name);
 
     // Execute code that produces multiple outputs
     let code = "for i in range(5):\n  print(i)";

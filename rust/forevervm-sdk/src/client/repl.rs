@@ -1,6 +1,6 @@
 use crate::api::{
     api_types::{ExecResult, Instruction},
-    id_types::{InstructionSeq, RequestSeq},
+    id_types::{InstructionSeq, MachineName, RequestSeq},
     protocol::{MessageFromServer, MessageToServer, StandardOutput},
     token::ApiToken,
 };
@@ -52,6 +52,7 @@ impl Default for ReplConnectionState {
 }
 
 pub struct ReplConnection {
+    pub machine_name: MachineName,
     request_seq_generator: RequestSeqGenerator,
     sender: WebSocketSend<MessageToServer>,
 
@@ -185,14 +186,24 @@ impl ReplConnection {
             .expect("Could not install default rustls provider");
 
         let req = authorized_request(url, token)?;
-        let (sender, receiver) =
+        let (sender, mut receiver) =
             websocket_connect::<MessageToServer, MessageFromServer>(req).await?;
 
         let state: Arc<Mutex<ReplConnectionState>> = Arc::default();
 
+        let machine_name = match receiver.recv().await? {
+            Some(MessageFromServer::Connected { machine_name }) => machine_name,
+            _ => {
+                return Err(ClientError::Other(String::from(
+                    "Expected `connected` message from REPL.",
+                )))
+            }
+        };
+
         let receiver_handle = tokio::spawn(receive_loop(receiver, state.clone()));
 
         Ok(Self {
+            machine_name,
             request_seq_generator: Default::default(),
             sender,
             receiver_handle: Some(receiver_handle),
