@@ -1,7 +1,5 @@
-import type { WebSocket as NodeWebSocket } from 'ws'
-
 import type { ExecResponse } from './types'
-import { websocket } from './ws'
+import WebSocket from 'isomorphic-ws'
 
 export interface ExecOptions {
   timeoutSeconds?: number
@@ -57,14 +55,20 @@ interface ReplOptions {
   machine?: string
 }
 
-let createWebsocket = websocket
+let createWebsocket = function (url: string, token: string) {
+  if (typeof window === 'undefined') {
+    return new WebSocket(url, { headers: { Authorization: `Bearer ${token}` } })
+  }
+
+  return new WebSocket(url + `?_forevervm_jwt=${token}`)
+}
 
 export class Repl {
   #baseUrl = 'wss://api.forevervm.com'
   #token = process.env.FOREVERVM_TOKEN || ''
   #machine: string | null = null
 
-  #ws: WebSocket | NodeWebSocket
+  #ws: WebSocket
   #listener = new EventTarget()
   #queued: MessageToServer | undefined
   #nextRequestId = 0
@@ -255,10 +259,10 @@ if (import.meta.vitest) {
   const FOREVERVM_TOKEN = process.env.FOREVERVM_TOKEN || ''
   const FOREVERVM_API_BASE = process.env.FOREVERVM_API_BASE || ''
 
-  let ws: WebSocket | NodeWebSocket
+  let ws: WebSocket
   beforeAll(() => {
     createWebsocket = (url: string, token: string) => {
-      ws = websocket(url, token)
+      ws = new WebSocket(url, { headers: { Authorization: `Bearer ${token}` } })
       return ws
     }
   })
