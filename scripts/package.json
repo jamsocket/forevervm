@@ -1,9 +1,11 @@
 {
   "name": "forevervm-scripts",
   "private": true,
+  "type": "module",
   "scripts": {
     "format": "prettier --write .",
     "bump": "npx tsx bump-versions.ts bump",
+    "publish": "npx tsx publish.ts",
     "check-format": "prettier --check ."
   },
   "dependencies": {
