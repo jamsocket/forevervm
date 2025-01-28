@@ -61,10 +61,10 @@ if (!token) {
 }
 
 // Initialize foreverVM
-const fvm = new ForeverVM(token)
+const fvm = new ForeverVM({ token })
 
 // Connect to a new machine.
-const repl = await fvm.repl()
+const repl = fvm.repl()
 
 // Execute some code
 let execResult = repl.exec('4 + 4')
