@@ -1,3 +1,5 @@
+#![deny(clippy::unwrap_used)]
+
 use clap::{Parser, Subcommand};
 use forevervm::{
     commands::{
@@ -52,33 +54,42 @@ enum MachineCommands {
     },
 }
 
-#[tokio::main]
-async fn main() {
+async fn main_inner() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Login { api_base_url } => {
-            login(api_base_url).await.unwrap();
+            login(api_base_url).await?;
         }
         Commands::Logout => {
-            logout().await.unwrap();
+            logout().await?;
         }
         Commands::Whoami => {
-            whoami().await.unwrap();
+            whoami().await?;
         }
         Commands::Machine { command } => match command {
             MachineCommands::New => {
-                machine_new().await.unwrap();
+                machine_new().await?;
             }
             MachineCommands::List => {
-                machine_list().await.unwrap();
+                machine_list().await?;
             }
             MachineCommands::Repl { machine_name } => {
-                machine_repl(machine_name).await.unwrap();
+                machine_repl(machine_name).await?;
             }
         },
         Commands::Repl { machine_name } => {
-            machine_repl(machine_name).await.unwrap();
+            machine_repl(machine_name).await?;
         }
+    }
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() {
+    if let Err(e) = main_inner().await {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
     }
 }
