@@ -37,10 +37,16 @@ pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<(
                                 ExecResultType::Error(err) => {
                                     eprintln!("Error: {}", err);
                                 }
-                                ExecResultType::Value(Some(data)) => {
-                                    println!("{}", data);
+                                ExecResultType::Value {
+                                    value: Some(value),
+                                    data: _,
+                                } => {
+                                    println!("{}", value);
                                 }
-                                ExecResultType::Value(None) => {}
+                                ExecResultType::Value {
+                                    value: None,
+                                    data: _,
+                                } => {}
                             },
                             Err(err) => {
                                 eprintln!("Error: {}", err);
