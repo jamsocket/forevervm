@@ -173,7 +173,7 @@ jobs:
         name: ${{ github.event.inputs.version }}
         draft: true
         generate_release_notes: true
-        tag_name: v${{ github.event.inputs.version }}
+        tag_name: ${{ github.event.inputs.version }}
         files: |
             forevervm-win-x64.exe.gz
             forevervm-linux-x64.gz
