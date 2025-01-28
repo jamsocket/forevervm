@@ -35,6 +35,7 @@ export interface ApiExecResponse {
 
 export interface ExecResponse {
   value?: string | null
+  data?: { [key: string]: unknown }
   error?: string
   runtime_ms: number
 }
