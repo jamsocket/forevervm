@@ -17,40 +17,6 @@ As the release version, put `vX.Y.Z` where X.Y.Z is the new version. (Note the l
 
 5. Publish the packages:
 
-npm:
-
 ```bash
-cd javascript/forevervm
-npm publish
-```
-
-```bash
-cd javascript/sdk
-npm publish
-```
-
-python:
-
-When prompted for a username, enter `__token__` (you will need a token to publish).
-
-```bash
-cd python/forevervm
-rm -rf dist
-uv build
-uv publish
-```
-
-```bash
-cd python/sdk
-rm -rf dist
-uv build
-uv publish
-```
-
-rust:
-
-```bash
-cd rust
-cargo install cargo-workspaces
-cargo workspaces publish --from-git
+npm --prefix scripts run publish
 ```
