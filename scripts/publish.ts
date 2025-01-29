@@ -12,6 +12,7 @@ function question(query: string) {
 
 rl.on('SIGINT', () => {
   abort.abort()
+  process.exit()
 })
 
 function exec(command: string, options?: cp.ExecOptions & { log?: boolean }) {
