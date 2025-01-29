@@ -60,11 +60,13 @@ impl Instruction {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[serde(untagged, rename_all = "snake_case")]
 pub enum ExecResultType {
-    #[serde(rename = "value")]
-    Value(Option<String>),
+    Value {
+        value: Option<String>,
+        data: Option<serde_json::Value>,
+    },
 
-    #[serde(rename = "error")]
     Error(String),
 }
 

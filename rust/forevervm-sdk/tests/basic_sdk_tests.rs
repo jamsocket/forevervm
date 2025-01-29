@@ -77,7 +77,10 @@ async fn test_exec() {
 
     assert_eq!(
         exec_result.result.result,
-        ExecResultType::Value(Some("567".to_string()))
+        ExecResultType::Value {
+            value: Some("567".to_string()),
+            data: None
+        }
     );
 }
 

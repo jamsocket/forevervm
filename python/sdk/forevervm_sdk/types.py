@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, TypedDict
+from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 
 class WhoamiResponse(TypedDict):
@@ -27,6 +27,7 @@ class ExecResultBase(TypedDict):
 
 class ExecResultValue(ExecResultBase):
     value: Optional[str]
+    data: Optional[Dict[str, Any]]
 
 
 class ExecResultError(ExecResultBase):
