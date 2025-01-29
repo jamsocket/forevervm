@@ -40,6 +40,7 @@ def test_repl():
     machine_name = fvm.create_machine()["machine_name"]
     repl = fvm.repl(machine_name)
     assert repl
+
     result = repl.exec("for i in range(5):\n  print(i)")
     output = list(result.output)
     assert output == [
@@ -49,3 +50,7 @@ def test_repl():
         {"data": "3", "stream": "stdout", "seq": 3},
         {"data": "4", "stream": "stdout", "seq": 4},
     ]
+
+    result = repl.exec("1 / 0")
+
+    assert "ZeroDivisionError" in result.result["error"]

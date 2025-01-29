@@ -299,6 +299,14 @@ if (import.meta.vitest) {
     expect(done).toBe(true)
   })
 
+  test.sequential('error', async () => {
+    const repl = new Repl({ baseUrl: FOREVERVM_API_BASE })
+
+    const { value, error } = await repl.exec('1 / 0').result
+    expect(value).toBeUndefined()
+    expect(error).toMatch('ZeroDivisionError')
+  })
+
   test.sequential('reconnect', async () => {
     const repl = new Repl({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
 

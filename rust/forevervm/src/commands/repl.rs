@@ -34,8 +34,8 @@ pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<(
                         let result = result.result().await;
                         match result {
                             Ok(result) => match result.result {
-                                ExecResultType::Error(err) => {
-                                    eprintln!("Error: {}", err);
+                                ExecResultType::Error { error } => {
+                                    eprintln!("Error: {}", error);
                                 }
                                 ExecResultType::Value {
                                     value: Some(value),
