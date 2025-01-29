@@ -73,8 +73,7 @@ class NpmPackageRepo implements PackageRepo {
   repoName = 'npm'
 
   gatherPackages(): Package[] {
-    const scriptDir = __dirname
-    const jsDir = path.join(scriptDir, '..', 'javascript')
+    const jsDir = path.join(import.meta.dirname, '..', 'javascript')
     const packages: Package[] = []
 
     const crawlDir = (dir: string) => {
@@ -141,8 +140,7 @@ class PythonPackageRepo implements PackageRepo {
   repoName = 'python'
 
   gatherPackages(): Package[] {
-    const scriptDir = __dirname
-    const pythonDir = path.join(scriptDir, '..', 'python')
+    const pythonDir = path.join(import.meta.dirname, '..', 'python')
     const packages: Package[] = []
 
     const crawlDir = (dir: string) => {
@@ -207,7 +205,7 @@ class CargoPackageRepo implements PackageRepo {
   repoName = 'cargo'
 
   gatherPackages(): Package[] {
-    const cargoDir = path.join(__dirname, '..', 'rust')
+    const cargoDir = path.join(import.meta.dirname, '..', 'rust')
     const packages: Package[] = []
 
     const crawlDir = (dir: string) => {
