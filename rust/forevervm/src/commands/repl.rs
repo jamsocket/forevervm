@@ -24,6 +24,7 @@ pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<(
 
         match readline {
             Ok(line) => {
+                rl.add_history_entry(line.as_str())?;
                 let result = repl.exec(&line).await;
                 match result {
                     Ok(mut result) => {
