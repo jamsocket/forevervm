@@ -117,4 +117,16 @@ async fn test_repl() {
         assert_eq!(output.data, i.to_string());
         assert_eq!(output.seq, (i as i64).into());
     }
+
+    // Execute code that results in an error
+    let code = "1 / 0";
+    let exec_result = repl.exec(code).await.expect("failed to execute code");
+
+    let result = exec_result.result().await.unwrap();
+    let ExecResultType::Error { error } = result.result else {
+        panic!("Expected error");
+    };
+
+    assert!(error.contains("ZeroDivisionError"));
+    assert!(error.contains("division by zero"));
 }
