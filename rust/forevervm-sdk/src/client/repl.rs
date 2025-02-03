@@ -180,10 +180,7 @@ async fn receive_loop(
 
 impl ReplConnection {
     pub async fn new(url: reqwest::Url, token: ApiToken) -> Result<Self, ClientError> {
-        // TODO: what is the best practice for this in library code?
-        rustls::crypto::aws_lc_rs::default_provider()
-            .install_default()
-            .expect("Could not install default rustls provider");
+        let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
 
         let req = authorized_request(url, token)?;
         let (sender, mut receiver) =
