@@ -4,19 +4,15 @@ MCP Server for ForeverVM, enabling Claude to execute code in a Python REPL.
 
 ## Tools
 
-1. `repl-exec`
+1. `create-python-repl`
+  - Create a Python REPL.
+  - Returns: ID of the new REPL.
+2. `run-python-in-repl`
    - Execute code in a Python REPL.
    - Required Inputs:
      - `code` (string): code that the Python REPL will run.
+     - `replId` (string): ID of the REPL to run the code on.
    - Returns: Result of the code executed.
-
-## Running Locally
-
-1. Clone this repository
-2. Run `npm install`
-3. Run `npm run build`
-4. Run `node ABSOLUTE_PATH/forevervm-mcp-server/build/index.js`
-   - To run with the MCP inspector, run `npx @modelcontextprotocol/inspector node ABSOLUTE_PATH/forevervm-mcp-server/build/index.js`. If you're running ForeverVM with the inspector, make sure to provide the foreverVM token in the environment variables input.
 
 ## Usage with Claude Desktop
 
@@ -26,11 +22,11 @@ Add the following to `claude_desktop_config.json`. On Mac, you can find this in 
 {
   "mcpServers": {
     "forevervm": {
-      "command": "ABSOLUTE_PATH/.nvm/versions/node/v22.13.1/bin/node",
+      "command": "npx",
+      "args": ["forevervm-mcp"],
       "env": {
         "FOREVERVM_TOKEN": "YOUR_FOREVERVM_TOKEN"
-      },
-      "args": ["ABSOLUTE_PATH/forevervm-mcp-server/build/index.js"]
+      }
     }
   }
 }
