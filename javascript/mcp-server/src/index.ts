@@ -82,20 +82,21 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
     }
 
     const result = await execResult.result
+    const imageResult = result.data?.["png"] as string | undefined
 
     if (typeof result.value === 'string') {
       return {
         output: output.join('\n'),
         result: result.value,
         replId: replId,
-        image: result.data?.["png"] as string | undefined,
+        image: imageResult
       }
     } else if (result.value === null) {
       return {
         output: output.join('\n'),
         result: 'The code returned no output',
         replId: replId,
-        image: result.data?.["png"] as string | undefined,
+        image: imageResult
       }
     } else if (result.error) {
       return {
@@ -103,14 +104,14 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
         result: '',
         replId: replId,
         error: `Error: ${result.error}`,
-        image: result.data?.["png"] as string | undefined,
+        image: imageResult
       }
     } else {
       return {
         output: output.join('\n'),
         result: 'No result or error returned',
         replId: replId,
-        image: result.data?.["png"] as string | undefined,
+        image: imageResult
       }
     }
   } catch (error: any) {
