@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run",
     "format": "prettier --write \"src/**/*.ts\"",
     "check-format": "prettier --check src/**/*.ts",
     "prepublishOnly": "npm run build"

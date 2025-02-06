@@ -11,7 +11,8 @@
   },
   "workspaces": [
     "sdk",
-    "forevervm"
+    "forevervm",
+    "mcp-server"
   ],
   "devDependencies": {
     "prettier": "^3.4.2",
