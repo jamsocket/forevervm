@@ -1,19 +1,21 @@
 {
-  "name": "forevervm-mcp-server",
-  "version": "0.0.0",
-  "private": true,
+  "name": "forevervm-mcp",
+  "version": "0.1.20",
   "description": "",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "forevervm": "./build/index.js"
+    "forevervm-mcp": "./build/index.js"
   },
   "files": [
     "build"
   ],
   "scripts": {
     "build": "tsc && shx chmod +x build/*.js",
-    "format": "prettier --write ."
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "check-format": "prettier --check src/**/*.ts"
   },
   "keywords": [],
   "author": "",

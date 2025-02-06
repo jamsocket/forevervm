@@ -63,6 +63,26 @@ let createWebsocket = function (url: string, token: string) {
   return new WebSocket(url + `?_forevervm_jwt=${token}`)
 }
 
+if (typeof CustomEvent !== 'function') {
+  class CustomEvent extends Event {
+    type: string
+    detail: any
+    bubbles: boolean
+    cancelable: boolean
+
+    constructor(type: string, params: any = {}) {
+      super(type, params)
+      this.type = type
+      this.detail = params.detail || null
+      this.bubbles = !!params.bubbles
+      this.cancelable = !!params.cancelable
+    }
+  }
+
+  // Make it globally available
+  ;(global as any).CustomEvent = CustomEvent
+}
+
 export class Repl {
   #baseUrl = 'wss://api.forevervm.com'
   #token = process.env.FOREVERVM_TOKEN || ''

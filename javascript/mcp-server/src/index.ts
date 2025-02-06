@@ -4,7 +4,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
-import { ForeverVM } from  "@forevervm/sdk"
+import { ForeverVM } from '@forevervm/sdk'
 
 // Zod schema
 const ExecMachineSchema = z.object({
@@ -35,7 +35,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             replId: {
               type: 'string',
-              description: 'The ID corresponding with the REPL to run the Python code on. REPLs persist global state across runs. Create a REPL once per session with the create-python-repl tool.',
+              description:
+                'The ID corresponding with the REPL to run the Python code on. REPLs persist global state across runs. Create a REPL once per session with the create-python-repl tool.',
             },
           },
           required: ['pythonCode', 'replId'],
@@ -62,16 +63,13 @@ interface ExecReplResponse {
   replId: string
   error?: string
 }
-async function makeExecReplRequest(
-  pythonCode: string,
-  replId: string,
-): Promise<ExecReplResponse> {
+async function makeExecReplRequest(pythonCode: string, replId: string): Promise<ExecReplResponse> {
   const forevervmToken = process.env.FOREVERVM_TOKEN
   if (!forevervmToken) {
     throw new Error('FOREVERVM_TOKEN is not set')
   }
   try {
-    const fvm = new ForeverVM({token: forevervmToken})
+    const fvm = new ForeverVM({ token: forevervmToken })
 
     const repl = await fvm.repl(replId)
 
@@ -111,9 +109,7 @@ async function makeExecReplRequest(
       }
     }
   } catch (error: any) {
-    throw new Error(
-      `Failed to execute code on the ForeverVM REPL: ${error} \n\nreplId: ${replId}`,
-    )
+    throw new Error(`Failed to execute code on the ForeverVM REPL: ${error} \n\nreplId: ${replId}`)
   }
 }
 
@@ -123,15 +119,13 @@ async function makeCreateMachineRequest(): Promise<string> {
     throw new Error('FOREVERVM_TOKEN is not set')
   }
   try {
-    const fvm = new ForeverVM({token: forevervmToken})
+    const fvm = new ForeverVM({ token: forevervmToken })
 
     const machine = await fvm.createMachine()
 
     return machine.machine_name
   } catch (error: any) {
-    throw new Error(
-      `Failed to create ForeverVM machine: ${error}`,
-    )
+    throw new Error(`Failed to create ForeverVM machine: ${error}`)
   }
 }
 
@@ -144,7 +138,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { pythonCode, replId } = ExecMachineSchema.parse(args)
       const execResponse = await makeExecReplRequest(pythonCode, replId)
 
-      if(execResponse.error) {
+      if (execResponse.error) {
         return {
           content: [
             {
@@ -176,9 +170,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
     } else {
       return {
-        content: [{ type: "text", text: `Unknown tool: ${name}` }],
+        content: [{ type: 'text', text: `Unknown tool: ${name}` }],
         isError: true,
-      };
+      }
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
