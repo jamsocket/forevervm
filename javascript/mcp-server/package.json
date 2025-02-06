@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc && shx chmod +x build/*.js",
     "prepublishOnly": "npm run build",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check-format": "prettier --check src/**/*.js"
   },
   "keywords": [],
   "author": "",
