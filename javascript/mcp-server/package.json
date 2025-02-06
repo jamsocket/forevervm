@@ -1,0 +1,32 @@
+{
+  "name": "forevervm-mcp-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "forevervm": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && shx chmod +x build/*.js",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@forevervm/sdk": "^0.1.20",
+    "@modelcontextprotocol/sdk": "^1.3.1",
+    "prettier": "^3.4.2",
+    "shx": "^0.3.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
+  }
+}
