@@ -14,7 +14,7 @@
     "build": "tsc && shx chmod +x build/*.js",
     "prepublishOnly": "npm run build",
     "format": "prettier --write .",
-    "check-format": "prettier --check src/**/*.js"
+    "check-format": "prettier --check src/**/*.ts"
   },
   "keywords": [],
   "author": "",
