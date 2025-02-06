@@ -89,7 +89,6 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
         result: result.value,
         replId: replId,
         image: result.data?.["png"] as string | undefined,
-
       }
     } else if (result.value === null) {
       return {
@@ -97,7 +96,6 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
         result: 'The code returned no output',
         replId: replId,
         image: result.data?.["png"] as string | undefined,
-
       }
     } else if (result.error) {
       return {
