@@ -69,7 +69,7 @@ async function publishToCrates() {
 
 async function publishToNpm() {
   let otp = ''
-  for (const pkg of ['forevervm', 'sdk']) {
+  for (const pkg of ['forevervm', 'sdk', 'mcp-server']) {
     const cwd = path.resolve('../javascript', pkg)
 
     const json = await import(path.resolve(cwd, 'package.json'), { with: { type: 'json' } })
