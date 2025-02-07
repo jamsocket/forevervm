@@ -552,7 +552,6 @@ dependencies = [
  "dialoguer",
  "dirs",
  "forevervm-sdk",
- "regex",
  "reqwest",
  "rustyline",
  "serde",
@@ -567,6 +566,7 @@ version = "0.1.21"
 dependencies = [
  "chrono",
  "futures-util",
+ "regex",
  "reqwest",
  "rustls",
  "serde",

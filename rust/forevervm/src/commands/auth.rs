@@ -1,10 +1,10 @@
 use crate::config::ConfigManager;
-use crate::util;
 use colorize::AnsiColor;
 use dialoguer::{theme::ColorfulTheme, Input, Password};
 use forevervm_sdk::{
     api::{api_types::ApiSignupRequest, token::ApiToken, ApiErrorResponse},
     client::ForeverVMClient,
+    util::{validate_account_name, validate_email},
 };
 use reqwest::{Client, Url};
 
@@ -42,10 +42,10 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .with_prompt("Enter your email")
         .allow_empty(false)
         .validate_with(|input: &String| -> Result<(), &str> {
-            if util::validate_email(input.trim()) {
+            if validate_email(input.trim()) {
                 Ok(())
             } else {
-                Err("Are you sure that's a valid email address?")
+                Err("Please enter a valid email address (example: name@company.com)")
             }
         })
         .interact_text()?
@@ -56,7 +56,7 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .with_prompt("Give your account a name")
         .allow_empty(false)
         .validate_with(|input: &String| -> Result<(), &str> {
-            if util::validate_account_name(input.trim()) {
+            if validate_account_name(input.trim()) {
                 Ok(())
             } else {
                 Err("Account names must be between 3 and 16 characters, and can only contain alphanumeric characters, underscores, and hyphens. (Note: account names are not case-sensitive.)")
@@ -67,7 +67,7 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .to_string();
 
     let client = Client::new();
-    let url = format!("{}/v1/signup", base_url);
+    let url = format!("{}/internal/signup", base_url);
     let response = client
         .post(url)
         .json(&ApiSignupRequest {

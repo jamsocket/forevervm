@@ -16,7 +16,6 @@ colorize = "0.1.0"
 dialoguer = { version = "0.11.0", features = ["password"] }
 dirs = "6.0.0"
 forevervm-sdk = { path = "../forevervm-sdk", version = "0.1.21" }
-regex = "1.11.1"
 reqwest = "0.12.12"
 rustyline = "15.0.0"
 serde = { version = "1.0.217", features = ["derive"] }
