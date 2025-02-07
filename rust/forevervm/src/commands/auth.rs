@@ -1,7 +1,12 @@
 use crate::config::ConfigManager;
+use crate::util;
 use colorize::AnsiColor;
-use forevervm_sdk::{api::token::ApiToken, client::ForeverVMClient};
-use url::Url;
+use dialoguer::{Input, Password};
+use forevervm_sdk::{
+    api::{api_types::ApiSignupRequest, token::ApiToken, ApiErrorResponse},
+    client::ForeverVMClient,
+};
+use reqwest::{Client, Url};
 
 pub async fn whoami() -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
@@ -19,6 +24,68 @@ pub async fn whoami() -> anyhow::Result<()> {
         }
     }
     Ok(())
+}
+
+pub async fn signup(base_url: Url) -> anyhow::Result<()> {
+    let config_manager = ConfigManager::new()?;
+    let config = config_manager.load()?;
+    if config.token.is_some() {
+        println!("Already logged in");
+        return Ok(());
+    }
+
+    println!(
+        "Enter your email and an account name below, and we'll send you a ForeverVM API token!\n"
+    );
+
+    let email = Input::new()
+        .with_prompt("Enter your email")
+        .allow_empty(false)
+        .validate_with(|input: &String| -> Result<(), &str> {
+            if util::validate_email(input) {
+                Ok(())
+            } else {
+                Err("Are you sure that's a valid email address?")
+            }
+        })
+        .interact_text()?;
+
+    let account_name = Input::new()
+        .with_prompt("Give your account a name")
+        .allow_empty(false)
+        .validate_with(|input: &String| -> Result<(), &str> {
+            if util::validate_account_name(input) {
+                Ok(())
+            } else {
+                Err("Account names must be between 3 and 16 characters, and can only contain alphanumeric characters, underscores, and hyphens.")
+            }
+        })
+        .interact_text()?;
+
+    let client = Client::new();
+    let url = format!("{}/v1/signup", base_url);
+    let response = client
+        .post(url)
+        .json(&ApiSignupRequest {
+            email: email.clone(),
+            account_name: account_name.clone(),
+        })
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        println!("\nSuccess! Check your email for your API token!\n");
+        return Ok(());
+    }
+
+    let status_code = response.status();
+    let Ok(body) = response.json::<ApiErrorResponse>().await else {
+        return Err(anyhow::anyhow!(format!(
+            "Server responded with a {} error.",
+            status_code
+        )));
+    };
+    Err(anyhow::anyhow!(body))
 }
 
 pub async fn login(base_url: Url) -> anyhow::Result<()> {
@@ -43,7 +110,8 @@ pub async fn login(base_url: Url) -> anyhow::Result<()> {
         println!("There is an existing token for another server. It will be replaced.")
     }
 
-    let token = rpassword::prompt_password("Enter your token: ")?;
+    let token = Password::new().with_prompt("Enter your token").interact()?;
+
     let token = ApiToken::new(token)?;
     let client = ForeverVMClient::new(base_url.clone(), token.clone());
     match client.whoami().await {

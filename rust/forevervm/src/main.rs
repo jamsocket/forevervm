@@ -3,7 +3,7 @@
 use clap::{Parser, Subcommand};
 use forevervm::{
     commands::{
-        auth::{login, logout, whoami},
+        auth::{login, logout, signup, whoami},
         machine::{machine_list, machine_new},
         repl::machine_repl,
     },
@@ -21,6 +21,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Signup to your account
+    Signup {
+        #[arg(long, default_value = DEFAULT_SERVER_URL)]
+        api_base_url: Url,
+    },
     /// Login to your account
     Login {
         #[arg(long, default_value = DEFAULT_SERVER_URL)]
@@ -58,6 +63,9 @@ async fn main_inner() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
+        Commands::Signup { api_base_url } => {
+            signup(api_base_url).await?;
+        }
         Commands::Login { api_base_url } => {
             login(api_base_url).await?;
         }
