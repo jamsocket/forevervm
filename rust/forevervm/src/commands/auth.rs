@@ -1,7 +1,7 @@
 use crate::config::ConfigManager;
 use crate::util;
 use colorize::AnsiColor;
-use dialoguer::{Input, Password};
+use dialoguer::{theme::ColorfulTheme, Input, Password};
 use forevervm_sdk::{
     api::{api_types::ApiSignupRequest, token::ApiToken, ApiErrorResponse},
     client::ForeverVMClient,
@@ -38,29 +38,33 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         "Enter your email and an account name below, and we'll send you a ForeverVM API token!\n"
     );
 
-    let email = Input::new()
+    let email = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Enter your email")
         .allow_empty(false)
         .validate_with(|input: &String| -> Result<(), &str> {
-            if util::validate_email(input) {
+            if util::validate_email(input.trim()) {
                 Ok(())
             } else {
                 Err("Are you sure that's a valid email address?")
             }
         })
-        .interact_text()?;
+        .interact_text()?
+        .trim()
+        .to_string();
 
-    let account_name = Input::new()
+    let account_name = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Give your account a name")
         .allow_empty(false)
         .validate_with(|input: &String| -> Result<(), &str> {
-            if util::validate_account_name(input) {
+            if util::validate_account_name(input.trim()) {
                 Ok(())
             } else {
-                Err("Account names must be between 3 and 16 characters, and can only contain alphanumeric characters, underscores, and hyphens.")
+                Err("Account names must be between 3 and 16 characters, and can only contain alphanumeric characters, underscores, and hyphens. (Note: account names are not case-sensitive.)")
             }
         })
-        .interact_text()?;
+        .interact_text()?
+        .trim()
+        .to_string();
 
     let client = Client::new();
     let url = format!("{}/v1/signup", base_url);
