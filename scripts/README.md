@@ -1,5 +1,4 @@
-Helper scripts
-==============
+# Helper scripts
 
 - `bump-versions.ts`: Bump the version of all packages in the project.
 
