@@ -543,7 +543,7 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "forevervm"
-version = "0.1.21"
+version = "0.1.22"
 dependencies = [
  "anyhow",
  "chrono",
@@ -562,7 +562,7 @@ dependencies = [
 
 [[package]]
 name = "forevervm-sdk"
-version = "0.1.21"
+version = "0.1.22"
 dependencies = [
  "chrono",
  "futures-util",
