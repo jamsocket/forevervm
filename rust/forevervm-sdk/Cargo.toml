@@ -11,6 +11,7 @@ description = "foreverVM SDK. Allows you to start foreverVMs and run a REPL on t
 [dependencies]
 chrono = { version = "0.4.39", features = ["serde"] }
 futures-util = "0.3.31"
+regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false, features = ["rustls-tls", "json"] }
 rustls = "0.23.21"
 serde = { version = "1.0.217", features = ["derive"] }

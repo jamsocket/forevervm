@@ -78,3 +78,9 @@ pub struct ExecResult {
     pub result: ExecResultType,
     pub runtime_ms: u64,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ApiSignupRequest {
+    pub email: String,
+    pub account_name: String,
+}
