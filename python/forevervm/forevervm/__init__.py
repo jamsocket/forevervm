@@ -72,7 +72,6 @@ def run_binary():
     env = os.environ.copy()
 
     env["FOREVERVM_RUNNER"] = "uvx"
-    env["FOREVERVM_SDK"] = "python"
     subprocess.run([binpath] + sys.argv[1:], env=env)
 
 

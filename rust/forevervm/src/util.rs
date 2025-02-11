@@ -1,5 +1,5 @@
 use chrono::Duration;
-use std::fmt::Display;
+use std::{env, fmt::Display};
 
 pub enum ApproximateDuration {
     Days(i64),
@@ -39,4 +39,12 @@ impl From<Duration> for ApproximateDuration {
 
         Self::Seconds(duration.num_seconds())
     }
+}
+
+pub fn get_runner() -> String {
+    env::var("FOREVERVM_RUNNER").unwrap_or_else(|_| "cargo".to_string())
+}
+
+pub fn get_sdk() -> String {
+    env::var("FOREVERVM_SDK").unwrap_or_else(|_| "rust".to_string())
 }

@@ -1,6 +1,7 @@
-use std::env;
-
-use crate::config::ConfigManager;
+use crate::{
+    config::ConfigManager,
+    util::{get_runner, get_sdk},
+};
 use colorize::AnsiColor;
 use dialoguer::{theme::ColorfulTheme, Input, Password};
 use forevervm_sdk::{
@@ -71,19 +72,11 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
     let client = Client::new();
     // base_url is always suffixed with a /
     let url = format!("{}internal/signup", base_url);
-    let mut builder = client.post(url);
-
-    let runner = env::var("FOREVERVM_RUNNER").ok();
-    if let Some(ref runner) = runner {
-        builder = builder.header("x-forevervm-runner", runner);
-    }
-
-    let sdk = env::var("FOREVERVM_SDK").ok();
-    if let Some(ref sdk) = sdk {
-        builder = builder.header("x-forevervm-sdk", sdk);
-    }
-
-    let response = builder
+    let runner = get_runner();
+    let response = client
+        .post(url)
+        .header("x-forevervm-runner", &runner)
+        .header("x-forevervm-sdk", get_sdk())
         .json(&ApiSignupRequest {
             email: email.clone(),
             account_name: account_name.clone(),
@@ -92,14 +85,16 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .await?;
 
     if response.status().is_success() {
-        let mut command = "forevervm login".to_string().b_green();
-        if let Some(ref runner) = runner {
-            command = format!("{runner} {command}").b_green();
+        let mut command: String = "forevervm login".to_string();
+
+        // binaries installed with cargo are executed without typing `cargo` first
+        if runner != "cargo" {
+            command = format!("{runner} {command}");
         }
 
         println!(
             "\nSuccess! Check your email for your API token! Then run {} to log in.\n",
-            command
+            command.b_green()
         );
         return Ok(());
     }
