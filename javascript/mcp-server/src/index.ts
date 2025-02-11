@@ -125,7 +125,7 @@ async function main() {
   let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
-    throw new Error('FOREVERVM_TOKEN is not set')
+    throw new Error('foreverVM needs a token. Set FOREVERVM_TOKEN or run `npx forevervm login`.')
   }
 
   const server = new Server(
