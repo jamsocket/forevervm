@@ -67,7 +67,8 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .to_string();
 
     let client = Client::new();
-    let url = format!("{}/internal/signup", base_url);
+    // base_url is always suffixed with a /
+    let url = format!("{}internal/signup", base_url);
     let response = client
         .post(url)
         .json(&ApiSignupRequest {
@@ -78,18 +79,33 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .await?;
 
     if response.status().is_success() {
-        println!("\nSuccess! Check your email for your API token!\n");
+        let command = "forevervm login".to_string().b_green();
+        println!(
+            "\nSuccess! Check your email for your API token! Then run {} to log in.\n",
+            command
+        );
         return Ok(());
     }
 
     let status_code = response.status();
-    let Ok(body) = response.json::<ApiErrorResponse>().await else {
-        return Err(anyhow::anyhow!(format!(
-            "Server responded with a {} error.",
-            status_code
-        )));
-    };
-    Err(anyhow::anyhow!(body))
+    let response_body = response.text().await?;
+    match serde_json::from_str::<ApiErrorResponse>(&response_body) {
+        Ok(body) => {
+            if body.code == "AccountNameAlreadyExists" {
+                Err(anyhow::anyhow!(
+                    "Account already exists. Please sign up with a different account name."
+                ))
+            } else if body.code == "EmailAlreadyExists" {
+                Err(anyhow::anyhow!("Email is already signed up. Check your email for your API token, or use a different email address."))
+            } else {
+                Err(anyhow::anyhow!(body))
+            }
+        }
+        Err(err) => Err(anyhow::anyhow!(format!(
+            "Unable to parse response as JSON. status code: {}, error: {}. response body: {}",
+            status_code, err, response_body
+        ))),
+    }
 }
 
 pub async fn login(base_url: Url) -> anyhow::Result<()> {
