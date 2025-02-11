@@ -1,4 +1,5 @@
 from os import environ
+import pytest
 from forevervm_sdk import ForeverVM
 
 FOREVERVM_API_BASE = environ.get("FOREVERVM_API_BASE")
@@ -25,13 +26,22 @@ def test_create_machine():
     assert machine_name in [m["name"] for m in machines]
 
 
-def test_exec():
+@pytest.mark.asyncio
+async def test_exec():
     fvm = ForeverVM(FOREVERVM_TOKEN, base_url=FOREVERVM_API_BASE)
     machine_name = fvm.create_machine()["machine_name"]
+
+    # sync
     code = "print(123) or 567"
     result = fvm.exec(code, machine_name)
     instruction_seq = result["instruction_seq"]
     exec_result = fvm.exec_result(machine_name, instruction_seq)
+    assert exec_result["result"]["value"] == "567"
+
+    # async
+    result = await fvm.exec_async(code, machine_name)
+    instruction_seq = result["instruction_seq"]
+    exec_result = await fvm.exec_result_async(machine_name, instruction_seq)
     assert exec_result["result"]["value"] == "567"
 
 

@@ -118,7 +118,7 @@ class ForeverVM:
             new_machine = await self.create_machine_async()
             machine_name = new_machine["machine_name"]
 
-        return self._post_async(
+        return await self._post_async(
             f"/v1/machine/{machine_name}/exec",
             type=ExecResponse,
             data={"instruction": {"code": code}, "interrupt": interrupt},

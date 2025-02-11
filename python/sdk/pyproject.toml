@@ -15,4 +15,5 @@ readme = "README.md"
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.3",
 ]
