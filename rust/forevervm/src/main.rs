@@ -1,5 +1,7 @@
 #![deny(clippy::unwrap_used)]
 
+use std::env;
+
 use clap::{Parser, Subcommand};
 use forevervm::{
     commands::{
@@ -61,6 +63,15 @@ enum MachineCommands {
 
 async fn main_inner() -> anyhow::Result<()> {
     let cli = Cli::parse();
+
+    env::set_var(
+        "FOREVERVM_RUNNER",
+        env::var("FOREVERVM_RUNNER").unwrap_or_else(|_| "cargo".to_string()),
+    );
+    env::set_var(
+        "FOREVERVM_SDK",
+        env::var("FOREVERVM_SDK").unwrap_or_else(|_| "rust".to_string()),
+    );
 
     match cli.command {
         Commands::Signup { api_base_url } => {

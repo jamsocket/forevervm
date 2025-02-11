@@ -71,10 +71,16 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
     let client = Client::new();
     // base_url is always suffixed with a /
     let url = format!("{}internal/signup", base_url);
-    let runner = env::var("FOREVERVM_RUNNER").ok();
     let mut builder = client.post(url);
+
+    let runner = env::var("FOREVERVM_RUNNER").ok();
     if let Some(ref runner) = runner {
         builder = builder.header("x-forevervm-runner", runner);
+    }
+
+    let sdk = env::var("FOREVERVM_SDK").ok();
+    if let Some(ref sdk) = sdk {
+        builder = builder.header("x-forevervm-sdk", sdk);
     }
 
     let response = builder

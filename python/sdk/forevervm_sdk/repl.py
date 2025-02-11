@@ -82,7 +82,9 @@ class Repl:
         machine_name="new",
         base_url=API_BASE_URL,
     ):
-        client = httpx.Client(headers={"authorization": f"Bearer {token}"})
+        client = httpx.Client(
+            headers={"authorization": f"Bearer {token}", "x-forevervm-sdk": "python"}
+        )
 
         base_url = re.sub(r"^http(s)?://", r"ws\1://", base_url)
 

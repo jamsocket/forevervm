@@ -24,12 +24,12 @@ export class ForeverVM {
     if (options.baseUrl) this.#baseUrl = options.baseUrl
   }
 
+  get #headers() {
+    return { 'authorization': `Bearer ${this.#token}`, 'x-forevervm-sdk': 'javascript' }
+  }
+
   async #get(path: string) {
-    const response = await fetch(`${this.#baseUrl}${path}`, {
-      headers: {
-        Authorization: `Bearer ${this.#token}`,
-      },
-    })
+    const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -39,10 +39,7 @@ export class ForeverVM {
   async #post(path: string, body?: object) {
     const response = await fetch(`${this.#baseUrl}${path}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.#token}`,
-      },
+      headers: { ...this.#headers, 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,
     })
     if (!response.ok) {

@@ -18,5 +18,6 @@ pub fn authorized_request(url: reqwest::Url, token: ApiToken) -> Result<Request<
         // ref: https://github.com/snapview/tungstenite-rs/blob/c16778797b2eeb118aa064aa5b483f90c3989627/src/client.rs#L240
         .header(SEC_WEBSOCKET_VERSION, "13")
         .header(SEC_WEBSOCKET_KEY, generate_key())
+        .header("x-forevervm-sdk", "rust")
         .body(())?)
 }

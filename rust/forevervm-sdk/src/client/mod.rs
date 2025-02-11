@@ -73,6 +73,7 @@ impl ForeverVMClient {
         let response = self
             .client
             .request(Method::POST, url)
+            .header("x-forevervm-sdk", "rust")
             .bearer_auth(self.token.to_string())
             .json(&request)
             .send()
@@ -90,6 +91,7 @@ impl ForeverVMClient {
         let response = self
             .client
             .request(Method::GET, url)
+            .header("x-forevervm-sdk", "rust")
             .bearer_auth(self.token.to_string())
             .send()
             .await?;
