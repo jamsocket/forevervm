@@ -35,10 +35,10 @@ function getForeverVMToken(): string | null {
     const config = JSON.parse(fileContent)
 
     if (!config.token) {
-      console.error('ForeverVM config file does not contain a token:', config)
+      console.error('ForeverVM config file does not contain a token')
       return null
     }
-    return config.token ?? null
+    return config.token
   } catch (error) {
     console.error('Failed to read ForeverVM config file:', error)
     return null
