@@ -5,6 +5,9 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import { ForeverVM } from '@forevervm/sdk'
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 // Zod schema
 const ExecMachineSchema = z.object({
@@ -56,6 +59,32 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   }
 })
 
+function getForeverVMToken(): string | null {
+  if(process.env.FOREVERVM_TOKEN) {
+    return process.env.FOREVERVM_TOKEN
+  }
+
+  const configFilePath = path.join(os.homedir(), '.config', 'forevervm', 'config.json');
+
+  if(!fs.existsSync(configFilePath)) {
+    return null;
+  }
+
+  try {
+    const fileContent = fs.readFileSync(configFilePath, 'utf8');
+    const config = JSON.parse(fileContent);
+
+    if (config.token) {
+      return config.token;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
+
 // ForeverVM integration
 interface ExecReplResponse {
   output: string
@@ -65,7 +94,8 @@ interface ExecReplResponse {
   image?: string
 }
 async function makeExecReplRequest(pythonCode: string, replId: string): Promise<ExecReplResponse> {
-  const forevervmToken = process.env.FOREVERVM_TOKEN
+  let forevervmToken = getForeverVMToken();
+
   if (!forevervmToken) {
     throw new Error('FOREVERVM_TOKEN is not set')
   }
@@ -120,7 +150,8 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
 }
 
 async function makeCreateMachineRequest(): Promise<string> {
-  const forevervmToken = process.env.FOREVERVM_TOKEN
+  let forevervmToken = getForeverVMToken();
+
   if (!forevervmToken) {
     throw new Error('FOREVERVM_TOKEN is not set')
   }
