@@ -68,7 +68,11 @@ def get_binary():
 
 def run_binary():
     binpath = get_binary()
-    subprocess.run([binpath] + sys.argv[1:])
+
+    env = os.environ.copy()
+
+    env['FOREVERVM_RUNNER'] = 'uvx'
+    subprocess.run([binpath] + sys.argv[1:], env=env)
 
 
 if __name__ == "__main__":
