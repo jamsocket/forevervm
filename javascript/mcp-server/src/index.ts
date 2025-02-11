@@ -15,49 +15,10 @@ const ExecMachineSchema = z.object({
   replId: z.string(),
 })
 
-// Server setup
-const server = new Server({ name: 'forevervm', version: '1.0.0' }, { capabilities: { tools: {} } })
 
 const RUN_REPL_TOOL_NAME = 'run-python-in-repl'
 const CREATE_REPL_MACHINE_TOOL_NAME = 'create-python-repl'
 
-// List tools
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: RUN_REPL_TOOL_NAME,
-        description:
-          'Run Python code in a given REPL. Common libraries including numpy, pandas, and requests are available to be imported. External API requests are allowed.',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            pythonCode: {
-              type: 'string',
-              description: 'Python code to execute in the REPL.',
-            },
-            replId: {
-              type: 'string',
-              description:
-                'The ID corresponding with the REPL to run the Python code on. REPLs persist global state across runs. Create a REPL once per session with the create-python-repl tool.',
-            },
-          },
-          required: ['pythonCode', 'replId'],
-        },
-      },
-      {
-        name: CREATE_REPL_MACHINE_TOOL_NAME,
-        description:
-          'Create a Python REPL. Global variables, imports, and function definitions are preserved between runs.',
-        inputSchema: {
-          type: 'object',
-          properties: {},
-          required: [],
-        },
-      },
-    ],
-  }
-})
 
 function getForeverVMToken(): string | null {
   if(process.env.FOREVERVM_TOKEN) {
@@ -74,11 +35,7 @@ function getForeverVMToken(): string | null {
     const fileContent = fs.readFileSync(configFilePath, 'utf8');
     const config = JSON.parse(fileContent);
 
-    if (config.token) {
-      return config.token;
-    } else {
-      return null;
-    }
+    return config.token ?? null
   } catch (error) {
     return null;
   }
@@ -93,12 +50,8 @@ interface ExecReplResponse {
   error?: string
   image?: string
 }
-async function makeExecReplRequest(pythonCode: string, replId: string): Promise<ExecReplResponse> {
-  let forevervmToken = getForeverVMToken();
+async function makeExecReplRequest(forevervmToken: string, pythonCode: string, replId: string): Promise<ExecReplResponse> {
 
-  if (!forevervmToken) {
-    throw new Error('FOREVERVM_TOKEN is not set')
-  }
   try {
     const fvm = new ForeverVM({ token: forevervmToken })
 
@@ -149,12 +102,7 @@ async function makeExecReplRequest(pythonCode: string, replId: string): Promise<
   }
 }
 
-async function makeCreateMachineRequest(): Promise<string> {
-  let forevervmToken = getForeverVMToken();
-
-  if (!forevervmToken) {
-    throw new Error('FOREVERVM_TOKEN is not set')
-  }
+async function makeCreateMachineRequest(forevervmToken: string): Promise<string> {
   try {
     const fvm = new ForeverVM({ token: forevervmToken })
 
@@ -166,6 +114,55 @@ async function makeCreateMachineRequest(): Promise<string> {
   }
 }
 
+
+// Start server
+async function main() {
+  let forevervmToken = getForeverVMToken();
+
+  if (!forevervmToken) {
+    throw new Error('FOREVERVM_TOKEN is not set')
+  }
+
+  const server = new Server({ name: 'forevervm', version: '1.0.0' }, { capabilities: { tools: {} } })
+
+  // List tools
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return {
+    tools: [
+      {
+        name: RUN_REPL_TOOL_NAME,
+        description:
+          'Run Python code in a given REPL. Common libraries including numpy, pandas, and requests are available to be imported. External API requests are allowed.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            pythonCode: {
+              type: 'string',
+              description: 'Python code to execute in the REPL.',
+            },
+            replId: {
+              type: 'string',
+              description:
+                'The ID corresponding with the REPL to run the Python code on. REPLs persist global state across runs. Create a REPL once per session with the create-python-repl tool.',
+            },
+          },
+          required: ['pythonCode', 'replId'],
+        },
+      },
+      {
+        name: CREATE_REPL_MACHINE_TOOL_NAME,
+        description:
+          'Create a Python REPL. Global variables, imports, and function definitions are preserved between runs.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+    ],
+  }
+})
+
 // Handle tool execution
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
@@ -173,7 +170,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     if (name === RUN_REPL_TOOL_NAME) {
       const { pythonCode, replId } = ExecMachineSchema.parse(args)
-      const execResponse = await makeExecReplRequest(pythonCode, replId)
+      const execResponse = await makeExecReplRequest(forevervmToken, pythonCode, replId)
 
       if (execResponse.error) {
         return {
@@ -208,7 +205,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         ],
       }
     } else if (name === CREATE_REPL_MACHINE_TOOL_NAME) {
-      const replId = await makeCreateMachineRequest()
+      const replId = await makeCreateMachineRequest(forevervmToken)
       return {
         content: [
           {
@@ -235,8 +232,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 })
 
-// Start server
-async function main() {
+
   const transport = new StdioServerTransport()
   await server.connect(transport)
 }
