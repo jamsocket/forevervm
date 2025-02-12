@@ -1,3 +1,4 @@
+import { env } from './env'
 import type { ExecResponse } from './types'
 import WebSocket from 'isomorphic-ws'
 
@@ -85,7 +86,7 @@ if (typeof CustomEvent !== 'function') {
 
 export class Repl {
   #baseUrl = 'wss://api.forevervm.com'
-  #token = process.env.FOREVERVM_TOKEN || ''
+  #token = env.FOREVERVM_TOKEN || ''
   #machine: string | null = null
 
   #ws: WebSocket

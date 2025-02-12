@@ -1,4 +1,5 @@
 import { Repl } from './repl'
+import { env } from './env'
 import type {
   ApiExecResponse,
   ApiExecResponseResult,
@@ -16,7 +17,7 @@ interface ForeverVMOptions {
 }
 
 export class ForeverVM {
-  #token = process.env.FOREVERVM_TOKEN || ''
+  #token = env.FOREVERVM_TOKEN || ''
   #baseUrl = 'https://api.forevervm.com'
 
   constructor(options: ForeverVMOptions = {}) {
