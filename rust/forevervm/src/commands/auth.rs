@@ -1,7 +1,4 @@
-use crate::{
-    config::ConfigManager,
-    util::{get_runner, get_sdk},
-};
+use crate::{config::ConfigManager, util::get_runner};
 use colorize::AnsiColor;
 use dialoguer::{theme::ColorfulTheme, Input, Password};
 use forevervm_sdk::{
@@ -73,10 +70,17 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
     // base_url is always suffixed with a /
     let url = format!("{}internal/signup", base_url);
     let runner = get_runner();
+    let sdk = match runner.as_str() {
+        "npx" => "javascript",
+        "uvx" => "python",
+        "cargo" => "rust",
+        _ => "unknown",
+    };
+
     let response = client
         .post(url)
         .header("x-forevervm-runner", &runner)
-        .header("x-forevervm-sdk", get_sdk())
+        .header("x-forevervm-sdk", sdk)
         .json(&ApiSignupRequest {
             email: email.clone(),
             account_name: account_name.clone(),

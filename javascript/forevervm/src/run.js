@@ -9,7 +9,7 @@ async function runBinary() {
   spawnSync(binpath, process.argv.slice(2), {
     stdio: 'inherit',
     stderr: 'inherit',
-    env: { ...process.env, FOREVERVM_RUNNER: 'npx', FOREVERVM_SDK: 'javascript' },
+    env: { ...process.env, FOREVERVM_RUNNER: 'npx' },
   })
 }
 

@@ -44,7 +44,3 @@ impl From<Duration> for ApproximateDuration {
 pub fn get_runner() -> String {
     env::var("FOREVERVM_RUNNER").unwrap_or_else(|_| "cargo".to_string())
 }
-
-pub fn get_sdk() -> String {
-    env::var("FOREVERVM_SDK").unwrap_or_else(|_| "rust".to_string())
-}
