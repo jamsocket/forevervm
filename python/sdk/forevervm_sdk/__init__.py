@@ -26,7 +26,7 @@ class ForeverVM:
         return f"{self._base_url}{path}"
 
     def _headers(self):
-        return {"authorization": f"Bearer {self._token}"}
+        return {"authorization": f"Bearer {self._token}", "x-forevervm-sdk": "python"}
 
     @property
     def _client(self):

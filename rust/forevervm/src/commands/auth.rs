@@ -1,4 +1,4 @@
-use crate::config::ConfigManager;
+use crate::{config::ConfigManager, util::get_runner};
 use colorize::AnsiColor;
 use dialoguer::{theme::ColorfulTheme, Input, Password};
 use forevervm_sdk::{
@@ -69,8 +69,18 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
     let client = Client::new();
     // base_url is always suffixed with a /
     let url = format!("{}internal/signup", base_url);
+    let runner = get_runner();
+    let sdk = match runner.as_str() {
+        "npx" => "javascript",
+        "uvx" => "python",
+        "cargo" => "rust",
+        _ => "unknown",
+    };
+
     let response = client
         .post(url)
+        .header("x-forevervm-runner", &runner)
+        .header("x-forevervm-sdk", sdk)
         .json(&ApiSignupRequest {
             email: email.clone(),
             account_name: account_name.clone(),
@@ -79,10 +89,16 @@ pub async fn signup(base_url: Url) -> anyhow::Result<()> {
         .await?;
 
     if response.status().is_success() {
-        let command = "forevervm login".to_string().b_green();
+        let mut command: String = "forevervm login".to_string();
+
+        // binaries installed with cargo are executed without typing `cargo` first
+        if runner != "cargo" {
+            command = format!("{runner} {command}");
+        }
+
         println!(
             "\nSuccess! Check your email for your API token! Then run {} to log in.\n",
-            command
+            command.b_green()
         );
         return Ok(());
     }
