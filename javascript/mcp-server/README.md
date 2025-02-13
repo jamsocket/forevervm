@@ -18,26 +18,8 @@ MCP Server for ForeverVM, enabling Claude to execute code in a Python REPL.
 
 ## Usage with Claude Desktop
 
-Add the following to `claude_desktop_config.json`. On Mac, you can find this in `~/Library/Application Support/Claude/`; see [the docs](https://modelcontextprotocol.io/quickstart/user). Then, restart Claude.
-
-```json
-{
-  "mcpServers": {
-    "forevervm": {
-      "command": "npx",
-      "args": ["forevervm-mcp"],
-      "env": {
-        "FOREVERVM_TOKEN": "YOUR_FOREVERVM_TOKEN"
-      }
-    }
-  }
-}
-```
-
-Or you can run
+Run the following command:
 
 ```bash
 npx forevervm-mcp install --claude
 ```
-
-to automate the setup step.
