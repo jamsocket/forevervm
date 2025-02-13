@@ -1,3 +1,5 @@
+use std::env;
+
 use regex::Regex;
 
 pub fn validate_email(email: &str) -> bool {
@@ -13,4 +15,8 @@ pub fn validate_account_name(account_name: &str) -> bool {
     account_name
         .chars()
         .all(|c| c.is_alphanumeric() || c == '_' || c == '-')
+}
+
+pub fn get_runner() -> Option<String> {
+    env::var("FOREVERVM_RUNNER").ok()
 }
