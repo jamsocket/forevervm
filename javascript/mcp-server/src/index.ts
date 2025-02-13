@@ -12,6 +12,28 @@ import { Command } from 'commander'
 
 // Install ForeverVM
 // For Claude Desktop, this function adds ForeverVM to the claude_desktop_config.json file
+function getClaudeConfigFilePath(): string {
+  const homeDir = os.homedir()
+
+  if (process.platform === 'win32') {
+    // Windows path
+    return path.join(
+      process.env.APPDATA || path.join(homeDir, 'AppData', 'Roaming'),
+      'Claude',
+      'claude_desktop_config.json',
+    )
+  } else {
+    // macOS & Linux path
+    return path.join(
+      homeDir,
+      'Library',
+      'Application Support',
+      'Claude',
+      'claude_desktop_config.json',
+    )
+  }
+}
+
 async function installForeverVM(options: { claude: boolean }) {
   let forevervmToken = getForeverVMToken()
 
@@ -21,13 +43,7 @@ async function installForeverVM(options: { claude: boolean }) {
   }
 
   if (options.claude) {
-    const configFilePath = path.join(
-      os.homedir(),
-      'Library',
-      'Application Support',
-      'Claude',
-      'claude_desktop_config.json',
-    )
+    const configFilePath = getClaudeConfigFilePath()
 
     // Ensure the parent directory exists
     const configDir = path.dirname(configFilePath)
@@ -53,8 +69,6 @@ async function installForeverVM(options: { claude: boolean }) {
       }
     }
 
-    config = config || {}
-
     config.mcpServers = config.mcpServers || {}
 
     config.mcpServers.forevervm = {
@@ -71,6 +85,9 @@ async function installForeverVM(options: { claude: boolean }) {
     } catch (error) {
       console.error('❌ Failed to write to Claude Desktop config file:', error)
     }
+  } else {
+    console.log('MCP client not selected. Use --claude to install for Claude Desktop.')
+    process.exit(1)
   }
 }
 
@@ -190,7 +207,7 @@ async function runMCPServer() {
   let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
-    throw Error('ForeverVM token not found. Please set up ForeverVM first.')
+    throw new Error('ForeverVM token not found. Please set up ForeverVM first.')
   }
 
   const server = new Server(
