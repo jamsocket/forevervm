@@ -52,14 +52,9 @@ impl ForeverVMClient {
 
     fn headers() -> HeaderMap {
         let mut headers = HeaderMap::new();
-        if let Ok(val) = HeaderValue::from_str("rust") {
-            headers.insert("x-forevervm-sdk", val);
-        }
+        headers.insert("x-forevervm-sdk", HeaderValue::from_static("rust"));
 
-        let runner = get_runner()
-            .map(|v| HeaderValue::from_str(&v).ok())
-            .flatten();
-        if let Some(val) = runner {
+        if let Some(val) = get_runner().and_then(|v| HeaderValue::from_str(&v).ok()) {
             headers.insert("x-forevervm-runner", val);
         }
 
