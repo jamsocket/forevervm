@@ -15,6 +15,7 @@
     "prepublishOnly": "npm run build",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
+    "start": "tsx src/index.ts",
     "check-format": "prettier --check src/**/*.ts"
   },
   "keywords": [],
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }
