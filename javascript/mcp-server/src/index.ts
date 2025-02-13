@@ -323,10 +323,10 @@ function main() {
     .option("-c, --claude", "Set up the MCP Server for Claude Desktop")
     .action(installForeverVM);
 
-    // program
-    // .command("run")
-    // .description("Set up the ForeverVM MCP server")
-    // .action(runMCPServer);
+    program
+    .command("run")
+    .description("Set up the ForeverVM MCP server")
+    .action(runMCPServer);
 
   program.parse(process.argv);
 
