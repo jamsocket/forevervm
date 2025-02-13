@@ -8,73 +8,72 @@ import { ForeverVM } from '@forevervm/sdk'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { Command } from "commander";
+import { Command } from 'commander'
 
-// install step adds the entire json object for forevervm to the claude desktop file
-// we grab the token from the ForeverVM CLI
-// if the cli config doesn't have a token then we print a message for forevervm setup first
+// Install ForeverVM
+// For Claude Desktop, this function adds ForeverVM to the claude_desktop_config.json file
 async function installForeverVM(options: { claude: boolean }) {
-  let forevervmToken = getForeverVMToken();
+  let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
-    console.error("ForeverVM token not found. Please set up ForeverVM first.");
-    throw new Error("ForeverVM token not found. Please set up ForeverVM first.");
+    console.error('ForeverVM token not found. Please set up ForeverVM first.')
+    throw new Error('ForeverVM token not found. Please set up ForeverVM first.')
   }
 
   if (options.claude) {
     const configFilePath = path.join(
       os.homedir(),
-      "Library",
-      "Application Support",
-      "Claude",
-      "claude_desktop_config.json"
-    );
+      'Library',
+      'Application Support',
+      'Claude',
+      'claude_desktop_config.json',
+    )
 
     // Ensure the parent directory exists
-    const configDir = path.dirname(configFilePath);
+    const configDir = path.dirname(configFilePath)
     if (!fs.existsSync(configDir)) {
       try {
-        fs.mkdirSync(configDir, { recursive: true });
+        fs.mkdirSync(configDir, { recursive: true })
       } catch (error) {
-        console.error("Failed to create Claude config directory:", error);
-        return;
+        console.error('Failed to create Claude config directory:', error)
+        return
       }
     }
 
-    let config: any = {};
+    let config: any = {}
 
     // If the file exists, read and parse the existing config
     if (fs.existsSync(configFilePath)) {
       try {
-        const fileContent = fs.readFileSync(configFilePath, "utf8");
-        config = JSON.parse(fileContent);
+        const fileContent = fs.readFileSync(configFilePath, 'utf8')
+        config = JSON.parse(fileContent)
       } catch (error) {
-        console.error("Failed to read or parse existing Claude config:", error);
-        return;
+        console.error('Failed to read or parse existing Claude config:', error)
+        return
       }
     }
 
-    // Store token in a variable to ensure consistency
-    const token = forevervmToken;
+    config = config || {}
 
-    // Ensure the forevervm section is updated
-    config.forevervm = {
-      command: "npx",
-      args: ["forevervm-mcp"],
+    config.mcpServers = config.mcpServers || {}
+
+    config.mcpServers.forevervm = {
+      command: 'npx',
+      args: ['forevervm-mcp'],
       env: {
-        FOREVERVM_TOKEN: token,
+        FOREVERVM_TOKEN: forevervmToken,
       },
-    };
+    }
 
-    // Write the updated config back to the file
     try {
-      fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2), "utf8");
-      console.log(`✅ Claude Desktop configuration updated successfully at: ${configFilePath}`);
+      fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2), 'utf8')
+      console.log(`✅ Claude Desktop configuration updated successfully at: ${configFilePath}`)
     } catch (error) {
-      console.error("❌ Failed to write to Claude Desktop config file:", error);
+      console.error('❌ Failed to write to Claude Desktop config file:', error)
     }
   }
 }
+
 // Zod schema
 const ExecMachineSchema = z.object({
   pythonCode: z.string(),
@@ -188,10 +187,10 @@ async function makeCreateMachineRequest(forevervmToken: string): Promise<string>
 
 // Start server
 async function runMCPServer() {
-  let forevervmToken = getForeverVMToken();
+  let forevervmToken = getForeverVMToken()
 
-  if(!forevervmToken) {
-    throw Error("ForeverVM token not found. Please set up ForeverVM first.");
+  if (!forevervmToken) {
+    throw Error('ForeverVM token not found. Please set up ForeverVM first.')
   }
 
   const server = new Server(
@@ -311,32 +310,24 @@ async function runMCPServer() {
 }
 
 function main() {
-  const program = new Command();
+  const program = new Command()
+
+  program.name('forevervm-mcp').version('1.0.0')
 
   program
-    .name("forevervm-mcp")
-    .version("1.0.0");
+    .command('install')
+    .description('Set up the ForeverVM MCP server')
+    .option('-c, --claude', 'Set up the MCP Server for Claude Desktop')
+    .action(installForeverVM)
 
-  program
-    .command("install")
-    .description("Set up the ForeverVM MCP server")
-    .option("-c, --claude", "Set up the MCP Server for Claude Desktop")
-    .action(installForeverVM);
+  program.parse(process.argv)
 
-    program
-    .command("run")
-    .description("Set up the ForeverVM MCP server")
-    .action(runMCPServer);
-
-  program.parse(process.argv);
-
-  // If no command was provided, run the MCP server
-  // if (!process.argv.slice(2).length) {
-  //   console.log("Starting ForeverVM MCP Server...");
-  //   runMCPServer().catch((error) => {
-  //     throw Error("Failed to start MCP Server")
-  //   });
-  // }
+  if (!process.argv.slice(2).length) {
+    console.log('Starting ForeverVM MCP Server...')
+    runMCPServer().catch((error) => {
+      throw Error('Failed to start MCP Server')
+    })
+  }
 }
 
 main()
