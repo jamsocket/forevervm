@@ -19,6 +19,8 @@ use tokio::{
     task::JoinHandle,
 };
 
+pub const DEFAULT_INSTRUCTION_TIMEOUT_SECONDS: i32 = 15;
+
 #[derive(Default)]
 pub struct RequestSeqGenerator {
     next: AtomicU32,
@@ -209,12 +211,20 @@ impl ReplConnection {
     }
 
     pub async fn exec(&mut self, code: &str) -> Result<ExecResultHandle, ClientError> {
+        let instruction = Instruction {
+            code: code.to_string(),
+            timeout_seconds: DEFAULT_INSTRUCTION_TIMEOUT_SECONDS,
+        };
+        self.exec_instruction(instruction).await
+    }
+
+    pub async fn exec_instruction(
+        &mut self,
+        instruction: Instruction,
+    ) -> Result<ExecResultHandle, ClientError> {
         let request_id = self.request_seq_generator.next();
         let message = MessageToServer::Exec {
-            instruction: Instruction {
-                code: code.to_string(),
-                timeout_seconds: 15,
-            },
+            instruction,
             request_id,
         };
         self.sender.send(&message).await?;
