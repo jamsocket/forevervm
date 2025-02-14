@@ -2,6 +2,7 @@ import * as cp from 'node:child_process'
 import path from 'node:path'
 import readline from 'node:readline/promises'
 import * as fs from 'node:fs'
+import { fileURLToPath } from 'url'
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 let abort = new AbortController()
@@ -28,7 +29,13 @@ function exec(command: string, options?: cp.ExecOptions & { log?: boolean }) {
 }
 
 function getVersion() {
-  const currentScriptPath = path.join(path.dirname(__filename), '..', 'javascript', 'forevervm', 'package.json')
+  const currentScriptPath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    'javascript',
+    'forevervm',
+    'package.json',
+  )
   const json = JSON.parse(fs.readFileSync(currentScriptPath, 'utf-8'))
   return json.version
 }
