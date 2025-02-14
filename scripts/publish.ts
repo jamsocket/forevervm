@@ -28,6 +28,9 @@ function exec(command: string, options?: cp.ExecOptions & { log?: boolean }) {
   })
 }
 
+/** Get the version number being deployed. Arbitrarily uses the forevervm npm package;
+ * All packages should be in sync but this is not tested.
+ */
 function getVersion() {
   const currentScriptPath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -40,6 +43,7 @@ function getVersion() {
   return json.version
 }
 
+/** Verify that all binary files exist for the given version. */
 async function verifyBinariesExist(version: string) {
   const files = [
     'win-x64.exe.gz',
