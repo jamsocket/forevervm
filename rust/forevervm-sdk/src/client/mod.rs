@@ -1,12 +1,18 @@
-use crate::api::{
-    api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
-    http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
-    id_types::{InstructionSeq, MachineName},
-    token::ApiToken,
+use crate::{
+    api::{
+        api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
+        http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
+        id_types::{InstructionSeq, MachineName},
+        token::ApiToken,
+    },
+    util::get_runner,
 };
 use error::{ClientError, Result};
 use repl::ReplConnection;
-use reqwest::{Client, Method, Response, Url};
+use reqwest::{
+    header::{HeaderMap, HeaderValue},
+    Client, Method, Response, Url,
+};
 use serde::{de::DeserializeOwned, Serialize};
 
 pub mod error;
@@ -44,6 +50,17 @@ impl ForeverVMClient {
         &self.api_base
     }
 
+    fn headers() -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert("x-forevervm-sdk", HeaderValue::from_static("rust"));
+
+        if let Some(val) = get_runner().and_then(|v| HeaderValue::from_str(&v).ok()) {
+            headers.insert("x-forevervm-runner", val);
+        }
+
+        headers
+    }
+
     pub async fn repl(&self, machine_name: &MachineName) -> Result<ReplConnection> {
         let mut base_url = self.api_base.clone();
         match base_url.scheme() {
@@ -73,7 +90,7 @@ impl ForeverVMClient {
         let response = self
             .client
             .request(Method::POST, url)
-            .header("x-forevervm-sdk", "rust")
+            .headers(ForeverVMClient::headers())
             .bearer_auth(self.token.to_string())
             .json(&request)
             .send()
@@ -91,7 +108,7 @@ impl ForeverVMClient {
         let response = self
             .client
             .request(Method::GET, url)
-            .header("x-forevervm-sdk", "rust")
+            .headers(ForeverVMClient::headers())
             .bearer_auth(self.token.to_string())
             .send()
             .await?;
