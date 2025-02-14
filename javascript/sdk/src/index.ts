@@ -14,15 +14,20 @@ export * from './repl'
 interface ForeverVMOptions {
   token?: string
   baseUrl?: string
+  timeoutSec?: number
 }
+
+const DEFAULT_TIMEOUT_SEC = 15
 
 export class ForeverVM {
   #token = env.FOREVERVM_TOKEN || ''
   #baseUrl = 'https://api.forevervm.com'
+  #timeoutSec = DEFAULT_TIMEOUT_SEC
 
   constructor(options: ForeverVMOptions = {}) {
     if (options.token) this.#token = options.token
     if (options.baseUrl) this.#baseUrl = options.baseUrl
+    if (options.timeoutSec) this.#timeoutSec = options.timeoutSec
   }
 
   get #headers() {
@@ -65,6 +70,7 @@ export class ForeverVM {
     code: string,
     machineName?: string,
     interrupt: boolean = false,
+    timeoutSec: number = this.#timeoutSec,
   ): Promise<ApiExecResponse> {
     if (!machineName) {
       const createResponse = await this.createMachine()
@@ -72,7 +78,7 @@ export class ForeverVM {
     }
 
     return await this.#post(`/v1/machine/${machineName}/exec`, {
-      instruction: { code },
+      instruction: { code, timeout_seconds: timeoutSec },
       interrupt,
     })
   }
