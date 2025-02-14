@@ -64,3 +64,23 @@ def test_repl():
     result = repl.exec("1 / 0")
 
     assert "ZeroDivisionError" in result.result["error"]
+
+
+def test_repl_timeout():
+    fvm = ForeverVM(FOREVERVM_TOKEN, base_url=FOREVERVM_API_BASE)
+    machine_name = fvm.create_machine()["machine_name"]
+    repl = fvm.repl(machine_name)
+    assert repl
+
+    result = repl.exec("from time import sleep")
+    result.result
+
+    result = repl.exec("sleep(10)", timeout_seconds=1)
+    assert "Timed out" in result.result["error"]
+
+    result = repl.exec("sleep(1); print('done')", timeout_seconds=5)
+    output = list(result.output)
+    assert output == [
+        {"data": "done", "stream": "stdout", "seq": 0},
+    ]
+    result.result
