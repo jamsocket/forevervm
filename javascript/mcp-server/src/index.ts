@@ -48,12 +48,8 @@ async function installForeverVM(options: { claude: boolean }) {
     // Ensure the parent directory exists
     const configDir = path.dirname(configFilePath)
     if (!fs.existsSync(configDir)) {
-      try {
-        fs.mkdirSync(configDir, { recursive: true })
-      } catch (error) {
-        console.error('Failed to create Claude config directory:', error)
-        return
-      }
+      console.error('Claude config directory does not exist. Unable to install ForeverVM for Claude Desktop.')
+      throw new Error('Claude config directory does not exist. Unable to install ForeverVM for Claude Desktop')
     }
 
     let config: any = {}
@@ -73,7 +69,7 @@ async function installForeverVM(options: { claude: boolean }) {
 
     config.mcpServers.forevervm = {
       command: 'npx',
-      args: ['forevervm-mcp'],
+      args: ['forevervm-mcp run'],
       env: {
         FOREVERVM_TOKEN: forevervmToken,
       },
@@ -337,14 +333,12 @@ function main() {
     .option('-c, --claude', 'Set up the MCP Server for Claude Desktop')
     .action(installForeverVM)
 
-  program.parse(process.argv)
+  program
+  .command('run')
+  .description('Runthe ForeverVM MCP server')
+  .action(runMCPServer)
 
-  if (!process.argv.slice(2).length) {
-    console.log('Starting ForeverVM MCP Server...')
-    runMCPServer().catch((error) => {
-      throw Error('Failed to start MCP Server')
-    })
-  }
+  program.parse(process.argv)
 }
 
 main()
