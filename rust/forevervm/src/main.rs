@@ -1,6 +1,6 @@
 #![deny(clippy::unwrap_used)]
 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use forevervm::{
     commands::{
         auth::{login, logout, signup, whoami},
@@ -10,6 +10,7 @@ use forevervm::{
     DEFAULT_SERVER_URL,
 };
 use forevervm_sdk::api::id_types::MachineName;
+use std::time::Duration;
 use url::Url;
 
 #[derive(Parser)]
@@ -17,6 +18,13 @@ use url::Url;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+}
+
+#[derive(Args)]
+pub struct ReplConfig {
+    machine_name: Option<MachineName>,
+    #[arg(long, default_value = "15")]
+    instruction_timeout_seconds: u64,
 }
 
 #[derive(Subcommand)]
@@ -40,10 +48,7 @@ enum Commands {
         command: MachineCommands,
     },
     /// Start a REPL session
-    Repl {
-        /// The name of the machine to run a repl on.
-        machine_name: Option<MachineName>,
-    },
+    Repl(ReplConfig),
 }
 
 #[derive(Subcommand)]
@@ -53,10 +58,7 @@ enum MachineCommands {
     /// List all machines
     List,
     /// Start a REPL session for a specific machine
-    Repl {
-        /// The name of the machine to run a repl on.
-        machine_name: Option<MachineName>,
-    },
+    Repl(ReplConfig),
 }
 
 async fn main_inner() -> anyhow::Result<()> {
@@ -82,14 +84,21 @@ async fn main_inner() -> anyhow::Result<()> {
             MachineCommands::List => {
                 machine_list().await?;
             }
-            MachineCommands::Repl { machine_name } => {
-                machine_repl(machine_name).await?;
+            MachineCommands::Repl(config) => {
+                run_repl(config).await?;
             }
         },
-        Commands::Repl { machine_name } => {
-            machine_repl(machine_name).await?;
+        Commands::Repl(config) => {
+            run_repl(config).await?;
         }
     }
+
+    Ok(())
+}
+
+pub async fn run_repl(config: ReplConfig) -> anyhow::Result<()> {
+    let instruction_timeout = Duration::from_secs(config.instruction_timeout_seconds);
+    machine_repl(config.machine_name, instruction_timeout).await?;
 
     Ok(())
 }

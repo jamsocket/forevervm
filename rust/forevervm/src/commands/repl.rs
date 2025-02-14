@@ -1,9 +1,16 @@
 use crate::config::ConfigManager;
 use colorize::AnsiColor;
-use forevervm_sdk::api::{api_types::ExecResultType, id_types::MachineName};
+use forevervm_sdk::api::{
+    api_types::{ExecResultType, Instruction},
+    id_types::MachineName,
+};
 use rustyline::{error::ReadlineError, DefaultEditor};
+use std::time::Duration;
 
-pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<()> {
+pub async fn machine_repl(
+    machine_name: Option<MachineName>,
+    instruction_timeout: Duration,
+) -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
 
     let machine_name = if let Some(machine_name) = machine_name {
@@ -25,7 +32,13 @@ pub async fn machine_repl(machine_name: Option<MachineName>) -> anyhow::Result<(
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str())?;
-                let result = repl.exec(&line).await;
+
+                let instruction = Instruction {
+                    code: line,
+                    timeout_seconds: instruction_timeout.as_secs() as i32,
+                };
+
+                let result = repl.exec_instruction(instruction).await;
                 match result {
                     Ok(mut result) => {
                         while let Some(output) = result.next().await {
