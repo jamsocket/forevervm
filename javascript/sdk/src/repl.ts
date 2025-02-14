@@ -58,7 +58,9 @@ interface ReplOptions {
 
 let createWebsocket = function (url: string, token: string) {
   if (typeof window === 'undefined') {
-    return new WebSocket(url, { headers: { Authorization: `Bearer ${token}` } })
+    return new WebSocket(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'x-forevervm-sdk': 'javascript' },
+    })
   }
 
   return new WebSocket(url + `?_forevervm_jwt=${token}`)
