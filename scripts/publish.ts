@@ -1,6 +1,7 @@
 import * as cp from 'node:child_process'
 import path from 'node:path'
 import readline from 'node:readline/promises'
+import * as fs from 'node:fs'
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 let abort = new AbortController()
@@ -26,7 +27,40 @@ function exec(command: string, options?: cp.ExecOptions & { log?: boolean }) {
   })
 }
 
+function getVersion() {
+  const currentScriptPath = path.join(path.dirname(__filename), '..', 'javascript', 'forevervm', 'package.json')
+  const json = JSON.parse(fs.readFileSync(currentScriptPath, 'utf-8'))
+  return json.version
+}
+
+async function verifyBinariesExist(version: string) {
+  const files = [
+    'win-x64.exe.gz',
+    'linux-x64.gz',
+    'linux-arm64.gz',
+    'macos-x64.gz',
+    'macos-arm64.gz',
+  ]
+
+  for (const file of files) {
+    const url = `https://github.com/jamsocket/forevervm/releases/download/v${version}/forevervm-${file}`
+
+    // send a HEAD request to check if the file exists
+    const res = await fetch(url, { method: 'HEAD' })
+
+    if (res.status !== 200) {
+      console.error(`Binary for ${file} does not exist! Got status ${res.status}`)
+      process.exit(1)
+    } else {
+      console.log(`Binary for ${file} exists!`)
+    }
+  }
+}
+
 async function main() {
+  const version = getVersion()
+  await verifyBinariesExist(version)
+
   const branch = await exec('git branch --show-current')
   if (branch.trim() !== 'main') {
     console.error('Must publish from main branch!')
