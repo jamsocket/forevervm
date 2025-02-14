@@ -8,6 +8,8 @@ from httpx_ws import WebSocketSession, connect_ws
 from .config import API_BASE_URL
 from .types import ExecResult, StandardOutput
 
+DEFAULT_INSTRUCTION_TIMEOUT_SECONDS = 15
+
 
 class ReplException(Exception):
     pass
@@ -102,14 +104,16 @@ class Repl:
     def __exit__(self, type, value, traceback):
         self._connection.__exit__(type, value, traceback)
 
-    def exec(self, code: str) -> ReplExecResult:
+    def exec(
+        self, code: str, timeout_seconds: int = DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
+    ) -> ReplExecResult:
         if self._instruction is not None and self._instruction._result is None:
             raise ReplException("Instruction already running")
 
         request_id = self._request_id
         self._request_id += 1
 
-        instruction = {"code": code}
+        instruction = {"code": code, "timeout_seconds": timeout_seconds}
         self._ws.send_json(
             {"type": "exec", "instruction": instruction, "request_id": request_id}
         )
