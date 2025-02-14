@@ -5,8 +5,10 @@ MCP Server for ForeverVM, enabling Claude to execute code in a Python REPL.
 ## Tools
 
 1. `create-python-repl`
-  - Create a Python REPL.
-  - Returns: ID of the new REPL.
+
+- Create a Python REPL.
+- Returns: ID of the new REPL.
+
 2. `run-python-in-repl`
    - Execute code in a Python REPL.
    - Required Inputs:
@@ -16,18 +18,8 @@ MCP Server for ForeverVM, enabling Claude to execute code in a Python REPL.
 
 ## Usage with Claude Desktop
 
-Add the following to `claude_desktop_config.json`. On Mac, you can find this in `~/Library/Application Support/Claude/`; see [the docs](https://modelcontextprotocol.io/quickstart/user). Then, restart Claude.
+Run the following command:
 
-```json
-{
-  "mcpServers": {
-    "forevervm": {
-      "command": "npx",
-      "args": ["forevervm-mcp"],
-      "env": {
-        "FOREVERVM_TOKEN": "YOUR_FOREVERVM_TOKEN"
-      }
-    }
-  }
-}
+```bash
+npx forevervm-mcp install --claude
 ```
