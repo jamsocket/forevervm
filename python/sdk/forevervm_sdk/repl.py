@@ -4,11 +4,10 @@ import re
 
 import httpx
 from httpx_ws import WebSocketSession, connect_ws
+from python.sdk.forevervm_sdk import DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
 
 from .config import API_BASE_URL
 from .types import ExecResult, StandardOutput
-
-DEFAULT_INSTRUCTION_TIMEOUT_SECONDS = 15
 
 
 class ReplException(Exception):
