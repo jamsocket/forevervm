@@ -1,14 +1,14 @@
 from collections import deque
 from warnings import warn
 import re
+from typing import Any
 
 import httpx
 from httpx_ws import WebSocketSession, connect_ws
+from forevervm_sdk.config import DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
 
 from .config import API_BASE_URL
 from .types import ExecResult, StandardOutput
-
-DEFAULT_INSTRUCTION_TIMEOUT_SECONDS = 15
 
 
 class ReplException(Exception):
@@ -18,10 +18,12 @@ class ReplException(Exception):
 class ReplExecResult:
     _request_id = -1
     _instruction_id = -1
+    _output: deque[StandardOutput]
 
     def __init__(self, request_id: int, ws: WebSocketSession):
         self._request_id = request_id
         self._ws = ws
+        self._output = deque()
 
     def _recv(self) -> str | None:
         msg = self._ws.receive_json()
@@ -29,7 +31,7 @@ class ReplExecResult:
         if msg["type"] == "exec_received":
             if msg["request_id"] != self._request_id:
                 warn(f"Expected request ID {self._request_id} with message {msg}")
-                return
+                return None
             self._instruction_id = msg["seq"]
 
         elif msg["type"] == "output":
@@ -37,7 +39,7 @@ class ReplExecResult:
                 warn(
                     f"Expected instruction ID {self._instruction_id} with message {msg}"
                 )
-                return
+                return None
             self._output.append(msg["chunk"])
 
         elif msg["type"] == "result":
@@ -45,15 +47,13 @@ class ReplExecResult:
                 warn(
                     f"Expected instruction ID {self._instruction_id} with message {msg}"
                 )
-                return
+                return None
             self._result = msg["result"]
 
         elif msg["type"] == "error":
             raise ReplException(msg["code"])
 
         return msg["type"]
-
-    _output = deque[StandardOutput]()
 
     @property
     def output(self):
@@ -77,6 +77,7 @@ class ReplExecResult:
 class Repl:
     _request_id = 0
     _instruction: ReplExecResult | None = None
+    _connection: Any
 
     def __init__(
         self,
