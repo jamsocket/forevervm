@@ -164,7 +164,7 @@ async function makeExecReplRequest(
     } else if (result.value === null) {
       return {
         output: output.join('\n'),
-        result: 'The code returned no output',
+        result: 'The code did not return a value',
         replId: replId,
         image: imageResult,
       }
