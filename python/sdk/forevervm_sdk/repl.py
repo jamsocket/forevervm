@@ -18,11 +18,12 @@ class ReplException(Exception):
 class ReplExecResult:
     _request_id = -1
     _instruction_id = -1
-    _output = deque[StandardOutput]()
+    _output: deque[StandardOutput]
 
     def __init__(self, request_id: int, ws: WebSocketSession):
         self._request_id = request_id
         self._ws = ws
+        self._output = deque()
 
     def _recv(self) -> str | None:
         msg = self._ws.receive_json()
