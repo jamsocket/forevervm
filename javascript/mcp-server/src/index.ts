@@ -148,7 +148,7 @@ async function makeExecReplRequest(
 
     const output: string[] = []
     for await (const nextOutput of execResult.output) {
-      output.push(`[${nextOutput.stream}] ${nextOutput.data}`)
+      output.push(nextOutput.data)
     }
 
     const result = await execResult.result
