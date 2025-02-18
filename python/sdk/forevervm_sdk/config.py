@@ -1,1 +1,2 @@
 API_BASE_URL = "https://api.forevervm.com"
+DEFAULT_INSTRUCTION_TIMEOUT_SECONDS = 15

@@ -84,3 +84,22 @@ def test_repl_timeout():
         {"data": "done", "stream": "stdout", "seq": 0},
     ]
     result.result
+
+
+@pytest.mark.asyncio
+async def test_exec_timeout():
+    fvm = ForeverVM(FOREVERVM_TOKEN, base_url=FOREVERVM_API_BASE)
+    machine_name = fvm.create_machine()["machine_name"]
+
+    result = fvm.exec("from time import sleep", machine_name)
+    instruction_seq = result["instruction_seq"]
+    fvm.exec_result(machine_name, instruction_seq)
+
+    # sync
+    code = "sleep(10)"
+    result = fvm.exec(code, machine_name, timeout_seconds=1)
+    assert "Timed out" in result.result["error"]
+
+    # async
+    result = await fvm.exec_async(code, machine_name, timeout_seconds=1)
+    assert "Timed out" in result.result["error"]

@@ -10,10 +10,9 @@ from .types import (
     ListMachinesResponse,
     WhoamiResponse,
 )
+from forevervm_sdk.config import DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
 
 T = TypeVar("T")
-
-DEFAULT_INSTRUCTION_TIMEOUT_SECONDS = 15
 
 
 class ForeverVM:
@@ -102,7 +101,13 @@ class ForeverVM:
     def list_machines_async(self):
         return self._get_async("/v1/machine/list", type=ListMachinesResponse)
 
-    def exec(self, code: str, machine_name: str | None = None, interrupt: bool = False, timeout_seconds: int = DEFAULT_INSTRUCTION_TIMEOUT_SECONDS):
+    def exec(
+        self,
+        code: str,
+        machine_name: str | None = None,
+        interrupt: bool = False,
+        timeout_seconds: int = DEFAULT_INSTRUCTION_TIMEOUT_SECONDS,
+    ):
         if not machine_name:
             new_machine = self.create_machine()
             machine_name = new_machine["machine_name"]
@@ -110,11 +115,18 @@ class ForeverVM:
         return self._post(
             f"/v1/machine/{machine_name}/exec",
             type=ExecResponse,
-            data={"instruction": {"code": code, "timeout_seconds": timeout_seconds}, "interrupt": interrupt},
+            data={
+                "instruction": {"code": code, "timeout_seconds": timeout_seconds},
+                "interrupt": interrupt,
+            },
         )
 
     async def exec_async(
-        self, code: str, machine_name: str | None = None, interrupt: bool = False, timeout_seconds: int = DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
+        self,
+        code: str,
+        machine_name: str | None = None,
+        interrupt: bool = False,
+        timeout_seconds: int = DEFAULT_INSTRUCTION_TIMEOUT_SECONDS,
     ):
         if not machine_name:
             new_machine = await self.create_machine_async()
@@ -123,7 +135,10 @@ class ForeverVM:
         return await self._post_async(
             f"/v1/machine/{machine_name}/exec",
             type=ExecResponse,
-            data={"instruction": {"code": code, "timeout_seconds": timeout_seconds}, "interrupt": interrupt},
+            data={
+                "instruction": {"code": code, "timeout_seconds": timeout_seconds},
+                "interrupt": interrupt,
+            },
         )
 
     def exec_result(self, machine_name: str, instruction_id: int):
