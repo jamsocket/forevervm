@@ -3,6 +3,7 @@
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/forevervm?style=social)](https://github.com/jamsocket/forevervm)
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947?color=404eed&label=discord)](https://discord.gg/N5sEpsuhh9)
+[![smithery badge](https://smithery.ai/badge/@jamsocket/forevervm)](https://smithery.ai/server/@jamsocket/forevervm)
 
 | repo                                                | version                     |
 |-----------------------------------------------------|-----------------------------|
@@ -21,6 +22,16 @@ Getting started
 ---------------
 
 You will need an API token (if you need one, reach out to [paul@jamsocket.com](mailto:paul@jamsocket.com)).
+
+### Installing via Smithery
+
+To install foreverVM for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@jamsocket/forevervm):
+
+```bash
+npx -y @smithery/cli install @jamsocket/forevervm --client claude
+```
+
+### Installing Manually
 
 The easiest way to try out foreverVM is using the CLI. First, you will need to log in:
 
