@@ -9,84 +9,37 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import { Command } from 'commander'
+import { installForClaude } from './install/claude.js'
+import { installForWindsurf } from './install/windsurf.js'
+import { installForGoose } from './install/goose.js'
 
-// Install ForeverVM
-// For Claude Desktop, this function adds ForeverVM to the claude_desktop_config.json file
-function getClaudeConfigFilePath(): string {
-  const homeDir = os.homedir()
-
-  if (process.platform === 'win32') {
-    // Windows path
-    return path.join(
-      process.env.APPDATA || path.join(homeDir, 'AppData', 'Roaming'),
-      'Claude',
-      'claude_desktop_config.json',
-    )
-  } else {
-    // macOS & Linux path
-    return path.join(
-      homeDir,
-      'Library',
-      'Application Support',
-      'Claude',
-      'claude_desktop_config.json',
-    )
-  }
-}
-
-async function installForeverVM(options: { claude: boolean }) {
+function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
   let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
-    console.error('ForeverVM token not found. Please set up ForeverVM first.')
-    throw new Error('ForeverVM token not found. Please set up ForeverVM first.')
+    console.error(
+      'ForeverVM token not found. Please set up ForeverVM first by running `npx forevervm login` or `npx forevervm signup`.',
+    )
+    process.exit(1)
+  }
+
+  if (!options.claude && !options.windsurf && !options.goose) {
+    console.log(
+      'Select at least one MCP client to install. Available options: --claude, --windsurf, --goose',
+    )
+    process.exit(1)
   }
 
   if (options.claude) {
-    const configFilePath = getClaudeConfigFilePath()
+    installForClaude()
+  }
 
-    // Ensure the parent directory exists
-    const configDir = path.dirname(configFilePath)
-    if (!fs.existsSync(configDir)) {
-      console.error(
-        `Claude config directory does not exist (tried ${configDir}). Unable to install ForeverVM for Claude Desktop.`,
-      )
-      process.exit(1)
-    }
+  if (options.goose) {
+    installForGoose()
+  }
 
-    let config: any = {}
-
-    // If the file exists, read and parse the existing config
-    if (fs.existsSync(configFilePath)) {
-      try {
-        const fileContent = fs.readFileSync(configFilePath, 'utf8')
-        config = JSON.parse(fileContent)
-      } catch (error) {
-        console.error('Failed to read or parse existing Claude config:', error)
-        process.exit(1)
-      }
-    }
-
-    config.mcpServers = config.mcpServers || {}
-
-    config.mcpServers.forevervm = {
-      command: 'npx',
-      args: ['forevervm-mcp', 'run'],
-      env: {
-        FOREVERVM_TOKEN: forevervmToken,
-      },
-    }
-
-    try {
-      fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2), 'utf8')
-      console.log(`✅ Claude Desktop configuration updated successfully at: ${configFilePath}`)
-    } catch (error) {
-      console.error('❌ Failed to write to Claude Desktop config file:', error)
-      process.exit(1)
-    }
-  } else {
-    console.log('MCP client not selected. Use --claude to install for Claude Desktop.')
-    process.exit(1)
+  if (options.windsurf) {
+    installForWindsurf()
   }
 }
 
@@ -337,6 +290,8 @@ function main() {
     .command('install')
     .description('Set up the ForeverVM MCP server')
     .option('-c, --claude', 'Set up the MCP Server for Claude Desktop')
+    .option('-g, --goose', 'Set up the MCP Server for Codename Goose (CLI only)')
+    .option('-w, --windsurf', 'Set up the MCP Server for Windsurf')
     .action(installForeverVM)
 
   program.command('run').description('Run the ForeverVM MCP server').action(runMCPServer)

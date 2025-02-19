@@ -27,6 +27,7 @@
     "commander": "^13.1.0",
     "prettier": "^3.4.2",
     "shx": "^0.3.4",
+    "yaml": "^2.7.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
