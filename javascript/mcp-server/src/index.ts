@@ -11,8 +11,9 @@ import os from 'os'
 import { Command } from 'commander'
 import { installForClaude } from './install/claude.js'
 import { installForWindsurf } from './install/windsurf.js'
+import { installForGoose } from './install/goose.js'
 
-async function installForeverVM(options: { claude: boolean; windsurf: boolean }) {
+async function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
   let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
@@ -22,16 +23,19 @@ async function installForeverVM(options: { claude: boolean; windsurf: boolean })
     process.exit(1)
   }
 
-  console.log('o', options)
-  if (!options.claude && !options.windsurf) {
+  if (!options.claude && !options.windsurf && !options.goose) {
     console.log(
-      'Select at least one MCP client to install. Available options: --claude, --windsurf',
+      'Select at least one MCP client to install. Available options: --claude, --windsurf, --goose',
     )
     process.exit(1)
   }
 
   if (options.claude) {
     installForClaude()
+  }
+
+  if (options.goose) {
+    installForGoose()
   }
 
   if (options.windsurf) {
@@ -286,6 +290,7 @@ function main() {
     .command('install')
     .description('Set up the ForeverVM MCP server')
     .option('-c, --claude', 'Set up the MCP Server for Claude Desktop')
+    .option('-g, --goose', 'Set up the MCP Server for Codename Goose (CLI only)')
     .option('-w, --windsurf', 'Set up the MCP Server for Windsurf')
     .action(installForeverVM)
 
