@@ -30,7 +30,7 @@ export function installForWindsurf() {
       const fileContent = fs.readFileSync(configFilePath, 'utf8')
       config = JSON.parse(fileContent)
     } catch (error) {
-      console.error('Failed to read or parse existing Claude config:', error)
+      console.error('Failed to read or parse existing Windsurf config:', error)
       process.exit(1)
     }
   }
