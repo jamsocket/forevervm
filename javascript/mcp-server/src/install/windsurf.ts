@@ -4,8 +4,15 @@ import fs from 'fs'
 
 function getWindsurfConfigFilePath(): string {
   // Ref: https://docs.codeium.com/windsurf/mcp
-  // NOTE: the official docs don't say where to put the file on Windows, so currently we don't support that.
   const homeDir = os.homedir()
+
+  if (process.platform === 'win32') {
+    // NOTE: the official docs don't say where to put the file on Windows, so currently we don't support that.
+    console.error(
+      'Automatic installation is not supported on Windows, follow the instructions here instead: https://docs.codeium.com/windsurf/mcp',
+    )
+    process.exit(1)
+  }
 
   return path.join(homeDir, '.codeium', 'windsurf', 'mcp_config.json')
 }
