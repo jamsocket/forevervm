@@ -13,7 +13,7 @@ import { installForClaude } from './install/claude.js'
 import { installForWindsurf } from './install/windsurf.js'
 import { installForGoose } from './install/goose.js'
 
-async function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
+function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
   let forevervmToken = getForeverVMToken()
 
   if (!forevervmToken) {
