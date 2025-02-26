@@ -42,5 +42,10 @@ impl From<Duration> for ApproximateDuration {
 }
 
 pub fn get_runner() -> String {
-    env::var("FOREVERVM_RUNNER").unwrap_or_else(|_| "cargo".to_string())
+    let allowlist = ["npx", "uvx", "cargo"];
+
+    match env::var("FOREVERVM_RUNNER") {
+        Ok(value) if allowlist.contains(&value.as_str()) => value,
+        _ => "cargo".to_string(),
+    }
 }
