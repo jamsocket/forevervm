@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "forevervm-sdk"
-version = "0.1.28"
+version = "0.1.29"
 dependencies = [
     "httpx>=0.28.1",
     "httpx-ws>=0.7.1",
