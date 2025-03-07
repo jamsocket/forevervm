@@ -171,7 +171,7 @@ impl ForeverVMClient {
         instruction: InstructionSeq,
     ) -> Result<Pin<Box<dyn Stream<Item = Result<MessageFromServer>> + Send>>> {
         let url = self.server_url().join(&format!(
-            "/machine/{machine_name}/exec/{instruction}/stream-result"
+            "/v1/machine/{machine_name}/exec/{instruction}/stream-result"
         ))?;
 
         let request = self
