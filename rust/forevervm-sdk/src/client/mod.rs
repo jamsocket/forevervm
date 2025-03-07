@@ -1,13 +1,17 @@
+use std::pin::Pin;
+
 use crate::{
     api::{
         api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
         http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
         id_types::{InstructionSeq, MachineName},
+        protocol::MessageFromServer,
         token::ApiToken,
     },
     util::get_runner,
 };
 use error::{ClientError, Result};
+use futures_util::{Stream, StreamExt};
 use repl::ReplConnection;
 use reqwest::{
     header::{HeaderMap, HeaderValue},
@@ -155,5 +159,62 @@ impl ForeverVMClient {
 
     pub async fn whoami(&self) -> Result<WhoamiResponse> {
         self.get_request("/whoami").await
+    }
+
+    /// Returns a stream of `MessageFromServer` values from the execution result endpoint.
+    ///
+    /// This method uses HTTP streaming to receive newline-delimited JSON responses
+    /// from the server. Each line is parsed into a `MessageFromServer` object.
+    pub async fn exec_result_stream(
+        &self,
+        machine_name: &MachineName,
+        instruction: InstructionSeq,
+    ) -> Result<Pin<Box<dyn Stream<Item = Result<MessageFromServer>> + Send>>> {
+        let url = self.server_url().join(&format!(
+            "/v1/machine/{machine_name}/exec/{instruction}/stream-result"
+        ))?;
+
+        let request = self
+            .client
+            .request(Method::GET, url)
+            .headers(ForeverVMClient::headers())
+            .bearer_auth(self.token.to_string())
+            .build()?;
+
+        let response = self.client.execute(request).await?;
+
+        if !response.status().is_success() {
+            return Err(parse_error(response).await?);
+        }
+
+        let stream = response
+            .bytes_stream()
+            .map(|result| -> Result<String> {
+                let bytes = result?;
+                Ok(String::from_utf8_lossy(&bytes).to_string())
+            })
+            .flat_map(|result| {
+                let lines = match result {
+                    Ok(text) => text.lines().map(|s| Ok(s.to_string())).collect::<Vec<_>>(),
+                    Err(err) => vec![Err(err)],
+                };
+                futures_util::stream::iter(lines)
+            })
+            .filter_map(|line_result| async move {
+                match line_result {
+                    Ok(line) => {
+                        if line.trim().is_empty() {
+                            return None;
+                        }
+                        match serde_json::from_str::<MessageFromServer>(&line) {
+                            Ok(message) => Some(Ok(message)),
+                            Err(err) => Some(Err(ClientError::from(err))),
+                        }
+                    }
+                    Err(err) => Some(Err(err)),
+                }
+            });
+
+        Ok(Box::pin(stream))
     }
 }
