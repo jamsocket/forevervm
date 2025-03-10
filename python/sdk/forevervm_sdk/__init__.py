@@ -8,6 +8,7 @@ from .types import (
     ExecResponse,
     ExecResultResponse,
     ListMachinesResponse,
+    RequestOptions,
     WhoamiResponse,
 )
 from forevervm_sdk.config import DEFAULT_INSTRUCTION_TIMEOUT_SECONDS
@@ -41,17 +42,17 @@ class ForeverVM:
             self.__client_async = httpx.AsyncClient()
         return self.__client_async
 
-    def _get(self, path: str, type: Type[T]) -> T:
-        response = self._client.get(self._url(path), headers=self._headers())
+    def _get(self, path: str, type: Type[T], **kwargs: RequestOptions) -> T:
+        response = self._client.get(self._url(path), headers=self._headers(), **kwargs)
 
         response.raise_for_status()
 
         json = response.json()
         return cast(T, json) if type else json
 
-    async def _get_async(self, path: str, type: Type[T]) -> T:
+    async def _get_async(self, path: str, type: Type[T], **kwargs: RequestOptions) -> T:
         response = await self._client_async.get(
-            self._url(path), headers=self._headers()
+            self._url(path), headers=self._headers(), **kwargs
         )
 
         response.raise_for_status()
@@ -59,11 +60,9 @@ class ForeverVM:
         json = response.json()
         return cast(T, json) if type else json
 
-    def _post(self, path, type: Type[T], data=None):
+    def _post(self, path, type: Type[T], data=None, **kwargs: RequestOptions):
         response = self._client.post(
-            self._url(path),
-            headers=self._headers(),
-            json=data,
+            self._url(path), headers=self._headers(), json=data, **kwargs
         )
 
         response.raise_for_status()
@@ -71,11 +70,11 @@ class ForeverVM:
         json = response.json()
         return cast(T, json) if type else json
 
-    async def _post_async(self, path, type: Type[T], data=None):
+    async def _post_async(
+        self, path, type: Type[T], data=None, **kwargs: RequestOptions
+    ):
         response = await self._client_async.post(
-            self._url(path),
-            headers={"authorization": f"Bearer {self._token}"},
-            json=data,
+            self._url(path), headers=self._headers(), json=data, **kwargs
         )
 
         response.raise_for_status()
@@ -145,12 +144,14 @@ class ForeverVM:
         return self._get(
             f"/v1/machine/{machine_name}/exec/{instruction_id}/result",
             type=ExecResultResponse,
+            timeout=1_200,
         )
 
     def exec_result_async(self, machine_name: str, instruction_id: int):
         return self._get_async(
             f"/v1/machine/{machine_name}/exec/{instruction_id}/result",
             type=ExecResultResponse,
+            timeout=1_200,
         )
 
     def repl(self, machine_name="new") -> Repl:

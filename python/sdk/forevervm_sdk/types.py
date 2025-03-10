@@ -1,6 +1,10 @@
 from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 
+class RequestOptions(TypedDict, total=False):
+    timeout: int
+
+
 class WhoamiResponse(TypedDict):
     account: str
 
