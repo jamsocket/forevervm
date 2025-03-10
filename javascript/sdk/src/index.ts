@@ -2,7 +2,8 @@ import { Repl } from './repl'
 import { env } from './env'
 import type {
   ApiExecResponse,
-  ApiExecResponseResult,
+  ApiExecResultResponse,
+  ApiExecResultStreamResponse,
   CreateMachineResponse,
   ListMachinesResponse,
   WhoamiResponse,
@@ -40,6 +41,29 @@ export class ForeverVM {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     return await response.json()
+  }
+
+  async *#getStream(path: string) {
+    const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const decoder = new TextDecoder()
+    const reader = response.body!.getReader()
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) return
+
+      const lines = decoder
+        .decode(value)
+        .split('\n')
+        .filter((line) => line.trim())
+      for (const line of lines) {
+        console.log('LINE', line)
+        yield JSON.parse(line)
+      }
+    }
   }
 
   async #post(path: string, body?: object) {
@@ -83,8 +107,15 @@ export class ForeverVM {
     })
   }
 
-  async execResult(machineName: string, instructionSeq: number): Promise<ApiExecResponseResult> {
+  async execResult(machineName: string, instructionSeq: number): Promise<ApiExecResultResponse> {
     return await this.#get(`/v1/machine/${machineName}/exec/${instructionSeq}/result`)
+  }
+
+  async *execResultStream(
+    machineName: string,
+    instructionSeq: number,
+  ): AsyncGenerator<ApiExecResultStreamResponse> {
+    yield* this.#getStream(`/v1/machine/${machineName}/exec/${instructionSeq}/stream-result`)
   }
 
   repl(machineName?: string): Repl {
@@ -127,5 +158,24 @@ if (import.meta.vitest) {
     expect(instruction_seq).toBe(0)
     const result = await fvm.execResult(machine_name, instruction_seq as number)
     expect(result.result.value).toBe('567')
+  })
+
+  test('execResultStream', async () => {
+    const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+    const { machine_name } = await fvm.createMachine()
+    const { instruction_seq } = await fvm.exec('for i in range(10): print(i)\n"done"', machine_name)
+    expect(instruction_seq).toBe(0)
+
+    let i = 0
+    for await (const item of fvm.execResultStream(machine_name, instruction_seq as number)) {
+      if (item.type === 'result') {
+        expect(item.result.value).toBe("'done'")
+      } else if (item.type === 'output') {
+        expect(item.chunk.stream).toBe('stdout')
+        expect(item.chunk.data).toBe(`${i}`)
+        expect(item.chunk.seq).toBe(i)
+        i += 1
+      }
+    }
   })
 }
