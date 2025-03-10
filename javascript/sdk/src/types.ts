@@ -90,7 +90,4 @@ export interface ApiExecResultResponse {
   runtime_ms: number
 }
 
-export type ApiExecResultStreamResponse =
-  | OutputMessageFromServer
-  | ResultMessageFromServer
-  | ErrorMessageFromServer
+export type ApiExecResultStreamResponse = OutputMessageFromServer | ResultMessageFromServer
