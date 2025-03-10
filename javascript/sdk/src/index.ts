@@ -49,18 +49,16 @@ export class ForeverVM {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const decoder = new TextDecoder()
-    const reader = response.body!.getReader()
+    if (!response.body) return
+
+    const decoder = new TextDecoderStream()
+    const reader = response.body.pipeThrough(decoder).getReader()
     while (true) {
-      const { done, value } = await reader.read()
+      const { done, value = '' } = await reader.read()
       if (done) return
 
-      const lines = decoder
-        .decode(value)
-        .split('\n')
-        .filter((line) => line.trim())
+      const lines = value.split('\n').filter((line) => line.trim())
       for (const line of lines) {
-        console.log('LINE', line)
         yield JSON.parse(line)
       }
     }
