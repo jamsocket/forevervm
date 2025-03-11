@@ -1,6 +1,7 @@
-import { env } from './env'
-import type { ExecResponse } from './types'
 import WebSocket from 'isomorphic-ws'
+
+import { env } from './env'
+import type { ExecResponse, MessageFromServer, StandardOutput } from './types'
 
 export interface ExecOptions {
   timeoutSeconds?: number
@@ -17,38 +18,6 @@ export type MessageToServer = {
   instruction: Instruction
   request_id: number
 }
-
-export type StandardOutput = {
-  stream: 'stdout' | 'stderr'
-  data: string
-  seq: number
-}
-
-export type MessageFromServer =
-  | {
-      type: 'connected'
-      machine_name: string
-    }
-  | {
-      type: 'exec_received'
-      seq: number // TODO: rename to instruction_id
-      request_id: number
-    }
-  | {
-      type: 'result'
-      instruction_id: number
-      result: ExecResponse
-    }
-  | {
-      type: 'output'
-      chunk: StandardOutput
-      instruction_id: number
-    }
-  | {
-      type: 'error'
-      code: string
-      id: string
-    }
 
 interface ReplOptions {
   baseUrl?: string
