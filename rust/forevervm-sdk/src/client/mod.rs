@@ -1,7 +1,10 @@
 use crate::{
     api::{
         api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
-        http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
+        http_api::{
+            CreateMachineRequest, CreateMachineResponse, ListMachinesRequest, ListMachinesResponse,
+            WhoamiResponse,
+        },
         id_types::{InstructionSeq, MachineName},
         protocol::MessageFromServer,
         token::ApiToken,
@@ -15,8 +18,8 @@ use reqwest::{
     header::{HeaderMap, HeaderValue},
     Client, Method, Response, Url,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{collections::HashMap, pin::Pin};
+use serde::{de::DeserializeOwned, Serialize};
+use std::pin::Pin;
 
 pub mod error;
 pub mod repl;
@@ -38,16 +41,6 @@ async fn parse_error(response: Response) -> Result<ClientError> {
     } else {
         Err(ClientError::ServerResponseError { code, message })
     }
-}
-
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct CreateMachineOptions {
-    tags: HashMap<String, String>,
-}
-
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct ListMachinesOptions {
-    tags: HashMap<String, String>,
 }
 
 impl ForeverVMClient {
@@ -135,14 +128,14 @@ impl ForeverVMClient {
 
     pub async fn create_machine(
         &self,
-        options: CreateMachineOptions,
+        options: CreateMachineRequest,
     ) -> Result<CreateMachineResponse> {
         self.post_request("/machine/new", options).await
     }
 
     pub async fn list_machines(
         &self,
-        options: ListMachinesOptions,
+        options: ListMachinesRequest,
     ) -> Result<ListMachinesResponse> {
         self.post_request("/machine/list", options).await
     }
