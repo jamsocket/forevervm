@@ -4,6 +4,7 @@ from typing import Type, cast, TypeVar
 from .config import API_BASE_URL
 from .repl import Repl
 from .types import (
+    CreateMachineRequest,
     CreateMachineResponse,
     ExecResponse,
     ExecResultResponse,
@@ -88,11 +89,17 @@ class ForeverVM:
     def whoami_async(self):
         return self._get_async("/v1/whoami", type=WhoamiResponse)
 
-    def create_machine(self):
-        return self._post("/v1/machine/new", type=CreateMachineResponse)
+    def create_machine(self, tags: dict[str, str] = None):
+        request: CreateMachineRequest = {}
+        if tags:
+            request["tags"] = tags
+        return self._post("/v1/machine/new", type=CreateMachineResponse, data=request)
 
-    def create_machine_async(self):
-        return self._post_async("/v1/machine/new", type=CreateMachineResponse)
+    def create_machine_async(self, tags: dict[str, str] = None):
+        request: CreateMachineRequest = {}
+        if tags:
+            request["tags"] = tags
+        return self._post_async("/v1/machine/new", type=CreateMachineResponse, data=request)
 
     def list_machines(self):
         return self._get("/v1/machine/list", type=ListMachinesResponse)
