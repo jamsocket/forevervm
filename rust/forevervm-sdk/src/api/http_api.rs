@@ -19,10 +19,10 @@ pub struct ListMachinesResponse {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct CreateMachineRequest {
-    tags: HashMap<String, String>,
+    pub tags: HashMap<String, String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ListMachinesRequest {
-    tags: HashMap<String, String>,
+    pub tags: HashMap<String, String>,
 }
