@@ -99,7 +99,9 @@ class ForeverVM:
         request: CreateMachineRequest = {}
         if tags:
             request["tags"] = tags
-        return self._post_async("/v1/machine/new", type=CreateMachineResponse, data=request)
+        return self._post_async(
+            "/v1/machine/new", type=CreateMachineResponse, data=request
+        )
 
     def list_machines(self):
         return self._get("/v1/machine/list", type=ListMachinesResponse)
