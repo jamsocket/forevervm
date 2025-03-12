@@ -1,9 +1,10 @@
-use std::pin::Pin;
-
 use crate::{
     api::{
         api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
-        http_api::{CreateMachineResponse, ListMachinesResponse, WhoamiResponse},
+        http_api::{
+            CreateMachineRequest, CreateMachineResponse, ListMachinesRequest, ListMachinesResponse,
+            WhoamiResponse,
+        },
         id_types::{InstructionSeq, MachineName},
         protocol::MessageFromServer,
         token::ApiToken,
@@ -18,6 +19,7 @@ use reqwest::{
     Client, Method, Response, Url,
 };
 use serde::{de::DeserializeOwned, Serialize};
+use std::pin::Pin;
 
 pub mod error;
 pub mod repl;
@@ -124,12 +126,18 @@ impl ForeverVMClient {
         Ok(response.json().await?)
     }
 
-    pub async fn create_machine(&self) -> Result<CreateMachineResponse> {
-        self.post_request("/machine/new", ()).await
+    pub async fn create_machine(
+        &self,
+        options: CreateMachineRequest,
+    ) -> Result<CreateMachineResponse> {
+        self.post_request("/machine/new", options).await
     }
 
-    pub async fn list_machines(&self) -> Result<ListMachinesResponse> {
-        self.get_request("/machine/list").await
+    pub async fn list_machines(
+        &self,
+        options: ListMachinesRequest,
+    ) -> Result<ListMachinesResponse> {
+        self.post_request("/machine/list", options).await
     }
 
     pub async fn exec_instruction(

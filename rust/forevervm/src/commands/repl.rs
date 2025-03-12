@@ -2,6 +2,7 @@ use crate::config::ConfigManager;
 use colorize::AnsiColor;
 use forevervm_sdk::api::{
     api_types::{ExecResultType, Instruction},
+    http_api::CreateMachineRequest,
     id_types::MachineName,
 };
 use rustyline::{error::ReadlineError, DefaultEditor};
@@ -16,7 +17,9 @@ pub async fn machine_repl(
     let machine_name = if let Some(machine_name) = machine_name {
         machine_name
     } else {
-        let machine = client.create_machine().await?;
+        let machine = client
+            .create_machine(CreateMachineRequest::default())
+            .await?;
         machine.machine_name
     };
 
