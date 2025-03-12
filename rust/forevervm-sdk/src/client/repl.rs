@@ -1,14 +1,13 @@
+use super::{
+    typed_socket::{websocket_connect, WebSocketRecv, WebSocketSend},
+    util::authorized_request,
+    ClientError,
+};
 use crate::api::{
     api_types::{ExecResult, Instruction},
     id_types::{InstructionSeq, MachineName, RequestSeq},
     protocol::{MessageFromServer, MessageToServer, StandardOutput},
     token::ApiToken,
-};
-
-use super::{
-    typed_socket::{websocket_connect, WebSocketRecv, WebSocketSend},
-    util::authorized_request,
-    ClientError,
 };
 use std::{
     ops::{Deref, DerefMut},
