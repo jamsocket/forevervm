@@ -1,5 +1,3 @@
-use std::pin::Pin;
-
 use crate::{
     api::{
         api_types::{ApiExecRequest, ApiExecResponse, ApiExecResultResponse, Instruction},
@@ -17,7 +15,8 @@ use reqwest::{
     header::{HeaderMap, HeaderValue},
     Client, Method, Response, Url,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::{collections::HashMap, pin::Pin};
 
 pub mod error;
 pub mod repl;
@@ -39,6 +38,16 @@ async fn parse_error(response: Response) -> Result<ClientError> {
     } else {
         Err(ClientError::ServerResponseError { code, message })
     }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct CreateMachineOptions {
+    tags: HashMap<String, String>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct ListMachinesOptions {
+    tags: HashMap<String, String>,
 }
 
 impl ForeverVMClient {
@@ -124,12 +133,18 @@ impl ForeverVMClient {
         Ok(response.json().await?)
     }
 
-    pub async fn create_machine(&self) -> Result<CreateMachineResponse> {
-        self.post_request("/machine/new", ()).await
+    pub async fn create_machine(
+        &self,
+        options: CreateMachineOptions,
+    ) -> Result<CreateMachineResponse> {
+        self.post_request("/machine/new", options).await
     }
 
-    pub async fn list_machines(&self) -> Result<ListMachinesResponse> {
-        self.get_request("/machine/list").await
+    pub async fn list_machines(
+        &self,
+        options: ListMachinesOptions,
+    ) -> Result<ListMachinesResponse> {
+        self.post_request("/machine/list", options).await
     }
 
     pub async fn exec_instruction(

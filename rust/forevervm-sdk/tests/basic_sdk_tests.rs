@@ -1,4 +1,5 @@
 use forevervm_sdk::api::api_types::Instruction;
+use forevervm_sdk::client::{CreateMachineOptions, ListMachinesOptions};
 use forevervm_sdk::{
     api::{api_types::ExecResultType, protocol::StandardOutputStream, token::ApiToken},
     client::ForeverVMClient,
@@ -32,7 +33,7 @@ async fn test_create_machine() {
 
     // Create a new machine
     let machine = client
-        .create_machine()
+        .create_machine(CreateMachineOptions::default())
         .await
         .expect("failed to create machine");
     let machine_name = machine.machine_name;
@@ -40,7 +41,7 @@ async fn test_create_machine() {
 
     // Verify machine appears in list
     let machines = client
-        .list_machines()
+        .list_machines(ListMachinesOptions::default())
         .await
         .expect("failed to list machines");
     assert!(machines.machines.iter().any(|m| m.name == machine_name));
@@ -53,7 +54,7 @@ async fn test_exec() {
 
     // Create machine and execute code
     let machine = client
-        .create_machine()
+        .create_machine(CreateMachineOptions::default())
         .await
         .expect("failed to create machine");
     let code = "print(123) or 567";
@@ -91,7 +92,7 @@ async fn test_repl() {
 
     // Create machine and get REPL
     let machine = client
-        .create_machine()
+        .create_machine(CreateMachineOptions::default())
         .await
         .expect("failed to create machine");
     let mut repl = client
