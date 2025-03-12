@@ -1,6 +1,7 @@
 use super::id_types::{InstructionSeq, MachineName};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct ApiMachine {
@@ -9,6 +10,9 @@ pub struct ApiMachine {
     pub running: bool,
     pub has_pending_instruction: bool,
     pub expires_at: Option<DateTime<Utc>>,
+
+    #[serde(default)]
+    pub tags: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

@@ -32,6 +32,9 @@ pub async fn machine_list() -> anyhow::Result<()> {
         println!("  Expires: {}", expires_at.b_yellow());
         println!("  Status:  {}", status.b_yellow());
         println!("  Running: {}", machine.running.to_string().b_yellow());
+        for (key, value) in machine.tags.into_iter() {
+            println!("  Tag: {} = {}", key.b_yellow(), value.b_yellow());
+        }
         println!();
     }
 
