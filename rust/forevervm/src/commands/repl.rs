@@ -1,11 +1,9 @@
 use crate::config::ConfigManager;
 use colorize::AnsiColor;
-use forevervm_sdk::{
-    api::{
-        api_types::{ExecResultType, Instruction},
-        id_types::MachineName,
-    },
-    client::CreateMachineOptions,
+use forevervm_sdk::api::{
+    api_types::{ExecResultType, Instruction},
+    http_api::CreateMachineRequest,
+    id_types::MachineName,
 };
 use rustyline::{error::ReadlineError, DefaultEditor};
 use std::time::Duration;
@@ -20,7 +18,7 @@ pub async fn machine_repl(
         machine_name
     } else {
         let machine = client
-            .create_machine(CreateMachineOptions::default())
+            .create_machine(CreateMachineRequest::default())
             .await?;
         machine.machine_name
     };

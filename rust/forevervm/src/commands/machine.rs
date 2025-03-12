@@ -1,11 +1,11 @@
 use crate::{config::ConfigManager, util::ApproximateDuration};
 use chrono::Utc;
 use colorize::AnsiColor;
-use forevervm_sdk::client::{CreateMachineOptions, ListMachinesOptions};
+use forevervm_sdk::api::http_api::{CreateMachineRequest, ListMachinesRequest};
 
 pub async fn machine_list() -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
-    let machines = client.list_machines(ListMachinesOptions::default()).await?;
+    let machines = client.list_machines(ListMachinesRequest::default()).await?;
 
     println!("Machines:");
     for machine in machines.machines {
@@ -42,7 +42,7 @@ pub async fn machine_new() -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
 
     let machine = client
-        .create_machine(CreateMachineOptions::default())
+        .create_machine(CreateMachineRequest::default())
         .await?;
 
     println!(
