@@ -34,7 +34,7 @@ wheels = [
 
 [[package]]
 name = "forevervm-sdk"
-version = "0.1.28"
+version = "0.1.30"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
