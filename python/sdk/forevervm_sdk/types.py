@@ -13,6 +13,10 @@ class CreateMachineResponse(TypedDict):
     machine_name: str
 
 
+class CreateMachineRequest(TypedDict, total=False):
+    tags: Dict[str, str]
+
+
 class Machine(TypedDict):
     name: str
     created_at: str
