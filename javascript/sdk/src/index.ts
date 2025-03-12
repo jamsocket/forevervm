@@ -4,6 +4,7 @@ import type {
   ApiExecResponse,
   ApiExecResultResponse,
   ApiExecResultStreamResponse,
+  CreateMachineRequest,
   CreateMachineResponse,
   ListMachinesResponse,
   WhoamiResponse,
@@ -80,8 +81,9 @@ export class ForeverVM {
     return await this.#get('/v1/whoami')
   }
 
-  async createMachine(): Promise<CreateMachineResponse> {
-    return await this.#post('/v1/machine/new')
+  async createMachine(tags?: Record<string, string>): Promise<CreateMachineResponse> {
+    const request: CreateMachineRequest = tags ? { tags } : {}
+    return await this.#post('/v1/machine/new', request)
   }
 
   async listMachines(): Promise<ListMachinesResponse> {
@@ -147,6 +149,19 @@ if (import.meta.vitest) {
     const machines = await fvm.listMachines()
     const found = machines.machines.find(({ name }) => name === machine.machine_name)
     expect(found).toBeDefined()
+  })
+
+  test('createMachine with tags', async () => {
+    const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+    const tags = { env: 'test', purpose: 'sdk-test' }
+
+    const machine = await fvm.createMachine(tags)
+    expect(machine.machine_name).toBeDefined()
+
+    const machines = await fvm.listMachines()
+    const found = machines.machines.find(({ name }) => name === machine.machine_name)
+    expect(found).toBeDefined()
+    expect(found?.tags).toEqual(tags)
   })
 
   test('exec and execResult', async () => {

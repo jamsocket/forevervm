@@ -44,6 +44,10 @@ export interface WhoamiResponse {
   account: string
 }
 
+export interface CreateMachineRequest {
+  tags?: Record<string, string>
+}
+
 export interface CreateMachineResponse {
   machine_name: string
 }
@@ -54,6 +58,7 @@ export interface Machine {
   running: boolean
   has_pending_instructions: boolean
   expires_at?: string
+  tags?: Record<string, string>
 }
 
 export interface ListMachinesResponse {
