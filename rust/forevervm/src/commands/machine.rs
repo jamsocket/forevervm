@@ -3,9 +3,10 @@ use chrono::Utc;
 use colorize::AnsiColor;
 use forevervm_sdk::api::http_api::{CreateMachineRequest, ListMachinesRequest};
 
-pub async fn machine_list() -> anyhow::Result<()> {
+pub async fn machine_list(tags: std::collections::HashMap<String, String>) -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
-    let machines = client.list_machines(ListMachinesRequest::default()).await?;
+    let request = ListMachinesRequest { tags };
+    let machines = client.list_machines(request).await?;
 
     println!("Machines:");
     for machine in machines.machines {
@@ -41,12 +42,11 @@ pub async fn machine_list() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn machine_new() -> anyhow::Result<()> {
+pub async fn machine_new(tags: std::collections::HashMap<String, String>) -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
 
-    let machine = client
-        .create_machine(CreateMachineRequest::default())
-        .await?;
+    let request = CreateMachineRequest { tags };
+    let machine = client.create_machine(request).await?;
 
     println!(
         "Created machine {}",

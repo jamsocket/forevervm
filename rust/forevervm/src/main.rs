@@ -10,8 +10,17 @@ use forevervm::{
     DEFAULT_SERVER_URL,
 };
 use forevervm_sdk::api::id_types::MachineName;
+use std::collections::HashMap;
 use std::time::Duration;
 use url::Url;
+
+/// Parse a key-value pair in the format of `key=value`
+fn parse_key_val(s: &str) -> Result<(String, String), String> {
+    let pos = s
+        .find('=')
+        .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
+    Ok((s[..pos].to_string(), s[pos + 1..].to_string()))
+}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -54,9 +63,17 @@ enum Commands {
 #[derive(Subcommand)]
 enum MachineCommands {
     /// Create a new machine
-    New,
+    New {
+        /// Add tags to the machine in the format key=value
+        #[arg(long = "tag", value_parser = parse_key_val, action = clap::ArgAction::Append)]
+        tags: Option<Vec<(String, String)>>,
+    },
     /// List all machines
-    List,
+    List {
+        /// Filter machines by tags in the format key=value
+        #[arg(long = "tag", value_parser = parse_key_val, action = clap::ArgAction::Append)]
+        tags: Option<Vec<(String, String)>>,
+    },
     /// Start a REPL session for a specific machine
     Repl(ReplConfig),
 }
@@ -78,11 +95,17 @@ async fn main_inner() -> anyhow::Result<()> {
             whoami().await?;
         }
         Commands::Machine { command } => match command {
-            MachineCommands::New => {
-                machine_new().await?;
+            MachineCommands::New { tags } => {
+                let tags_map = tags
+                    .map(|tags| tags.into_iter().collect::<HashMap<String, String>>())
+                    .unwrap_or_default();
+                machine_new(tags_map).await?;
             }
-            MachineCommands::List => {
-                machine_list().await?;
+            MachineCommands::List { tags } => {
+                let tags_map = tags
+                    .map(|tags| tags.into_iter().collect::<HashMap<String, String>>())
+                    .unwrap_or_default();
+                machine_list(tags_map).await?;
             }
             MachineCommands::Repl(config) => {
                 run_repl(config).await?;
