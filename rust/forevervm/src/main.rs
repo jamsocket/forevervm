@@ -69,7 +69,11 @@ enum MachineCommands {
         tags: Option<Vec<(String, String)>>,
     },
     /// List all machines
-    List,
+    List {
+        /// Filter machines by tags in the format key=value
+        #[arg(long = "tag", value_parser = parse_key_val, action = clap::ArgAction::Append)]
+        tags: Option<Vec<(String, String)>>,
+    },
     /// Start a REPL session for a specific machine
     Repl(ReplConfig),
 }
@@ -97,8 +101,11 @@ async fn main_inner() -> anyhow::Result<()> {
                     .unwrap_or_default();
                 machine_new(tags_map).await?;
             }
-            MachineCommands::List => {
-                machine_list().await?;
+            MachineCommands::List { tags } => {
+                let tags_map = tags
+                    .map(|tags| tags.into_iter().collect::<HashMap<String, String>>())
+                    .unwrap_or_default();
+                machine_list(tags_map).await?;
             }
             MachineCommands::Repl(config) => {
                 run_repl(config).await?;
