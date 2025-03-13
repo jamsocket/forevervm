@@ -19,10 +19,12 @@ pub struct ListMachinesResponse {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct CreateMachineRequest {
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub tags: HashMap<String, String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ListMachinesRequest {
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub tags: HashMap<String, String>,
 }
