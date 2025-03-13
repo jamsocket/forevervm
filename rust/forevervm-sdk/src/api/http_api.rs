@@ -21,6 +21,10 @@ pub struct ListMachinesResponse {
 pub struct CreateMachineRequest {
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub tags: HashMap<String, String>,
+
+    /// Memory size in MB. If not specified, a default value will be used.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub memory_mb: Option<u32>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
