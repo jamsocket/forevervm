@@ -9,6 +9,10 @@ class WhoamiResponse(TypedDict):
     account: str
 
 
+class CreateMachineRequest(TypedDict, total=False):
+    tags: Dict[str, str]
+
+
 class CreateMachineResponse(TypedDict):
     machine_name: str
 
@@ -19,6 +23,7 @@ class Machine(TypedDict):
     running: bool
     has_pending_instructions: bool
     expires_at: Optional[str]
+    tags: Dict[str, str]
 
 
 class ListMachinesResponse(TypedDict):
