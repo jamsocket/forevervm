@@ -61,6 +61,10 @@ export interface Machine {
   tags?: Record<string, string>
 }
 
+export interface ListMachinesRequest {
+  tags?: Record<string, string>
+}
+
 export interface ListMachinesResponse {
   machines: Machine[]
 }

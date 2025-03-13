@@ -6,6 +6,7 @@ import type {
   ApiExecResultStreamResponse,
   CreateMachineRequest,
   CreateMachineResponse,
+  ListMachinesRequest,
   ListMachinesResponse,
   WhoamiResponse,
 } from './types'
@@ -85,8 +86,8 @@ export class ForeverVM {
     return await this.#post('/v1/machine/new', request)
   }
 
-  async listMachines(): Promise<ListMachinesResponse> {
-    return await this.#get('/v1/machine/list')
+  async listMachines(request: ListMachinesRequest = {}): Promise<ListMachinesResponse> {
+    return await this.#post('/v1/machine/list', request)
   }
 
   async exec(
@@ -194,5 +195,29 @@ if (import.meta.vitest) {
     expect(foundTagged?.tags).toBeDefined()
     expect(foundTagged?.tags?.env).toBe('test')
     expect(foundTagged?.tags?.purpose).toBe('sdk-test')
+  })
+
+  test('listMachines with tag filter', async () => {
+    const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+
+    // Create an untagged machine
+    const untaggedMachine = await fvm.createMachine()
+    expect(untaggedMachine.machine_name).toBeDefined()
+
+    // Create a uniquely tagged machine
+    const uniqueTag = `test-${Date.now()}`
+    const taggedMachine = await fvm.createMachine({
+      tags: { unique: uniqueTag },
+    })
+    expect(taggedMachine.machine_name).toBeDefined()
+
+    // List machines with the unique tag filter
+    const filteredMachines = await fvm.listMachines({
+      tags: { unique: uniqueTag },
+    })
+
+    // Verify only our machine with the unique tag is returned
+    expect(filteredMachines.machines.length).toBe(1)
+    expect(filteredMachines.machines[0].tags?.unique).toBe(uniqueTag)
   })
 }
