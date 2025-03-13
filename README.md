@@ -81,3 +81,28 @@ for await (const output of execResult.output) {
 
 process.exit(0)
 ```
+
+Working with Tags
+----------------
+
+You can create machines with tags and filter machines by tags:
+
+```typescript
+import { ForeverVM } from '@forevervm/sdk'
+
+const fvm = new ForeverVM({ token: process.env.FOREVERVM_TOKEN })
+
+// Create a machine with tags
+const machineResponse = await fvm.createMachine({
+  tags: { 
+    env: 'production', 
+    owner: 'user123',
+    project: 'demo'
+  }
+})
+
+// List machines filtered by tags
+const productionMachines = await fvm.listMachines({
+  tags: { env: 'production' }
+})
+```
