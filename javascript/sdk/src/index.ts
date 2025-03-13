@@ -82,7 +82,7 @@ export class ForeverVM {
     return await this.#get('/v1/whoami')
   }
 
-  async createMachine(request?: CreateMachineRequest): Promise<CreateMachineResponse> {
+  async createMachine(request: CreateMachineRequest = {}): Promise<CreateMachineResponse> {
     return await this.#post('/v1/machine/new', request)
   }
 
