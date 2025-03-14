@@ -42,12 +42,15 @@ pub async fn machine_list(tags: std::collections::HashMap<String, String>) -> an
     Ok(())
 }
 
-pub async fn machine_new(tags: std::collections::HashMap<String, String>) -> anyhow::Result<()> {
+pub async fn machine_new(
+    tags: std::collections::HashMap<String, String>,
+    memory_mb: Option<u32>,
+) -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
 
     let request = CreateMachineRequest {
         tags,
-        memory_mb: None,
+        memory_mb,
     };
     let machine = client.create_machine(request).await?;
 

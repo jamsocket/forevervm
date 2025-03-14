@@ -67,6 +67,10 @@ enum MachineCommands {
         /// Add tags to the machine in the format key=value
         #[arg(long = "tag", value_parser = parse_key_val, action = clap::ArgAction::Append)]
         tags: Option<Vec<(String, String)>>,
+        
+        /// Memory size in MB (if not specified, a default value will be used)
+        #[arg(long)]
+        memory_mb: Option<u32>,
     },
     /// List all machines
     List {
@@ -95,11 +99,11 @@ async fn main_inner() -> anyhow::Result<()> {
             whoami().await?;
         }
         Commands::Machine { command } => match command {
-            MachineCommands::New { tags } => {
+            MachineCommands::New { tags, memory_mb } => {
                 let tags_map = tags
                     .map(|tags| tags.into_iter().collect::<HashMap<String, String>>())
                     .unwrap_or_default();
-                machine_new(tags_map).await?;
+                machine_new(tags_map, memory_mb).await?;
             }
             MachineCommands::List { tags } => {
                 let tags_map = tags
