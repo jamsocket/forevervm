@@ -67,7 +67,7 @@ enum MachineCommands {
         /// Add tags to the machine in the format key=value
         #[arg(long = "tag", value_parser = parse_key_val, action = clap::ArgAction::Append)]
         tags: Option<Vec<(String, String)>>,
-        
+
         /// Memory size in MB (if not specified, a default value will be used)
         #[arg(long)]
         memory_mb: Option<u32>,

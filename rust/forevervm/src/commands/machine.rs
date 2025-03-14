@@ -48,10 +48,7 @@ pub async fn machine_new(
 ) -> anyhow::Result<()> {
     let client = ConfigManager::new()?.client()?;
 
-    let request = CreateMachineRequest {
-        tags,
-        memory_mb,
-    };
+    let request = CreateMachineRequest { tags, memory_mb };
     let machine = client.create_machine(request).await?;
 
     println!(
