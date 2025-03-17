@@ -40,7 +40,8 @@ export class ForeverVM {
   async #get(path: string) {
     const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
     return await response.json()
   }
@@ -48,7 +49,8 @@ export class ForeverVM {
   async *#getStream(path: string) {
     const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
 
     if (!response.body) return
@@ -92,8 +94,10 @@ export class ForeverVM {
       body: body ? JSON.stringify(body) : undefined,
     })
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
+
     return await response.json()
   }
 
