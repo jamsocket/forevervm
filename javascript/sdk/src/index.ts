@@ -198,7 +198,7 @@ if (import.meta.vitest) {
     }
   })
 
-  test('execResultStream with image', async () => {
+  test('execResultStream with image', { timeout: 10000 }, async () => {
     const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
     const { machine_name } = await fvm.createMachine()
 

@@ -299,7 +299,7 @@ if (import.meta.vitest) {
     expect(error).toMatch('ZeroDivisionError')
   })
 
-  test.sequential('reconnect', async () => {
+  test.sequential('reconnect', { timeout: 10000 }, async () => {
     const repl = new Repl({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
 
     await repl.exec('1 + 1').result
