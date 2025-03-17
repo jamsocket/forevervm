@@ -195,33 +195,29 @@ impl ForeverVMClient {
             return Err(parse_error(response).await?);
         }
 
-        let stream = response
-            .bytes_stream()
-            .map(|result| -> Result<String> {
-                let bytes = result?;
-                Ok(String::from_utf8_lossy(&bytes).to_string())
-            })
-            .flat_map(|result| {
-                let lines = match result {
-                    Ok(text) => text.lines().map(|s| Ok(s.to_string())).collect::<Vec<_>>(),
-                    Err(err) => vec![Err(err)],
-                };
-                futures_util::stream::iter(lines)
-            })
-            .filter_map(|line_result| async move {
-                match line_result {
-                    Ok(line) => {
-                        if line.trim().is_empty() {
-                            return None;
-                        }
-                        match serde_json::from_str::<MessageFromServer>(&line) {
-                            Ok(message) => Some(Ok(message)),
-                            Err(err) => Some(Err(ClientError::from(err))),
-                        }
+        let stream = async_stream::stream! {
+            let mut bytes_stream = response.bytes_stream();
+            let mut buffer = String::new();
+            while let Some(bytes) = bytes_stream.next().await {
+                let mut value = String::from_utf8_lossy(&bytes?).to_string();
+
+                'chunk: loop {
+                    if let Some((first, rest)) = value.split_once('\n') {
+                        let json = &format!("{buffer}{first}");
+                        yield match serde_json::from_str::<MessageFromServer>(json) {
+                            Ok(message) => Ok(message),
+                            Err(err) => Err(ClientError::from(err)),
+                        };
+
+                        value = String::from(rest);
+                        buffer = String::new();
+                    } else {
+                        buffer += &value;
+                        break 'chunk;
                     }
-                    Err(err) => Some(Err(err)),
                 }
-            });
+            }
+        };
 
         Ok(Box::pin(stream))
     }

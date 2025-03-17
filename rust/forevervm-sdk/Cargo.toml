@@ -9,6 +9,7 @@ readme = "README.md"
 description = "foreverVM SDK. Allows you to start foreverVMs and run a REPL on them."
 
 [dependencies]
+async-stream = "0.3.6"
 chrono = { version = "0.4.39", features = ["serde"] }
 futures-util = "0.3.31"
 regex = "1.11.1"
