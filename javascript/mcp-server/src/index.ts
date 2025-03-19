@@ -13,10 +13,17 @@ import { installForClaude } from './install/claude.js'
 import { installForWindsurf } from './install/windsurf.js'
 import { installForGoose } from './install/goose.js'
 
-function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
-  let forevervmToken = getForeverVMToken()
+const DEFAULT_FOREVERVM_SERVER = 'https://api.forevervm.com'
 
-  if (!forevervmToken) {
+interface ForeverVMOptions {
+  token?: string
+  baseUrl?: string
+}
+
+function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
+  const forevervmOptions = getForeverVMOptions()
+
+  if (!forevervmOptions?.token) {
     console.error(
       'ForeverVM token not found. Please set up ForeverVM first by running `npx forevervm login` or `npx forevervm signup`.',
     )
@@ -52,9 +59,12 @@ const ExecMachineSchema = z.object({
 const RUN_REPL_TOOL_NAME = 'run-python-in-repl'
 const CREATE_REPL_MACHINE_TOOL_NAME = 'create-python-repl'
 
-function getForeverVMToken(): string | null {
+function getForeverVMOptions(): ForeverVMOptions | null {
   if (process.env.FOREVERVM_TOKEN) {
-    return process.env.FOREVERVM_TOKEN
+    return {
+      token: process.env.FOREVERVM_TOKEN,
+      baseUrl: process.env.FOREVERVM_BASE_URL || DEFAULT_FOREVERVM_SERVER,
+    }
   }
 
   const configFilePath = path.join(os.homedir(), '.config', 'forevervm', 'config.json')
@@ -72,7 +82,11 @@ function getForeverVMToken(): string | null {
       console.error('ForeverVM config file does not contain a token')
       process.exit(1)
     }
-    return config.token
+
+    return {
+      token: config.token,
+      baseUrl: config.baseUrl || DEFAULT_FOREVERVM_SERVER,
+    }
   } catch (error) {
     console.error('Failed to read ForeverVM config file:', error)
     process.exit(1)
@@ -88,12 +102,12 @@ interface ExecReplResponse {
   image?: string
 }
 async function makeExecReplRequest(
-  forevervmToken: string,
+  forevervmOptions: ForeverVMOptions,
   pythonCode: string,
   replId: string,
 ): Promise<ExecReplResponse> {
   try {
-    const fvm = new ForeverVM({ token: forevervmToken })
+    const fvm = new ForeverVM(forevervmOptions)
 
     const repl = await fvm.repl(replId)
 
@@ -143,9 +157,9 @@ async function makeExecReplRequest(
   }
 }
 
-async function makeCreateMachineRequest(forevervmToken: string): Promise<string> {
+async function makeCreateMachineRequest(forevervmOptions: ForeverVMOptions): Promise<string> {
   try {
-    const fvm = new ForeverVM({ token: forevervmToken })
+    const fvm = new ForeverVM(forevervmOptions)
 
     const machine = await fvm.createMachine()
 
@@ -158,9 +172,9 @@ async function makeCreateMachineRequest(forevervmToken: string): Promise<string>
 
 // Start server
 async function runMCPServer() {
-  let forevervmToken = getForeverVMToken()
+  const forevervmOptions = getForeverVMOptions()
 
-  if (!forevervmToken) {
+  if (!forevervmOptions) {
     console.error('ForeverVM token not found. Please set up ForeverVM first.')
     process.exit(1)
   }
@@ -215,7 +229,7 @@ async function runMCPServer() {
     try {
       if (name === RUN_REPL_TOOL_NAME) {
         const { pythonCode, replId } = ExecMachineSchema.parse(args)
-        const execResponse = await makeExecReplRequest(forevervmToken, pythonCode, replId)
+        const execResponse = await makeExecReplRequest(forevervmOptions, pythonCode, replId)
 
         if (execResponse.error) {
           return {
@@ -250,7 +264,7 @@ async function runMCPServer() {
           ],
         }
       } else if (name === CREATE_REPL_MACHINE_TOOL_NAME) {
-        const replId = await makeCreateMachineRequest(forevervmToken)
+        const replId = await makeCreateMachineRequest(forevervmOptions)
         return {
           content: [
             {
