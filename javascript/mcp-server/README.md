@@ -28,7 +28,7 @@ For other MCP clients, see [the docs](https://forevervm.com/docs/guides/foreverv
 
 ## Installing locally (for development only)
 
-In the MCP client, set the command to `npm` and the argumentsn to:
+In the MCP client, set the command to `npm` and the arguments to:
 
 ```json
 ["--prefix", "<path/to/this/directory>", "run", "start", "run"]
