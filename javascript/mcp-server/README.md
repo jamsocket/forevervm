@@ -23,3 +23,13 @@ Run the following command:
 ```bash
 npx forevervm-mcp install --claude
 ```
+
+For other MCP clients, see [the docs](https://forevervm.com/docs/guides/forevervm-mcp-server/).
+
+## Installing locally (for development only)
+
+In the MCP client, set the command to `npm` and the argumentsn to:
+
+```json
+["--prefix", "<path/to/this/directory>", "run", "start", "run"]
+```

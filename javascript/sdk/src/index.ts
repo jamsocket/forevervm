@@ -88,11 +88,16 @@ export class ForeverVM {
   }
 
   async #post(path: string, body?: object) {
-    const response = await fetch(`${this.#baseUrl}${path}`, {
-      method: 'POST',
-      headers: { ...this.#headers, 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    })
+    let response
+    try {
+      response = await fetch(`${this.#baseUrl}${path}`, {
+        method: 'POST',
+        headers: { ...this.#headers, 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      })
+    } catch (error) {
+      throw new Error(`Failed to fetch: ${error}`)
+    }
     if (!response.ok) {
       const text = await response.text().catch(() => 'Unknown error')
       throw new Error(`HTTP ${response.status}: ${text}`)

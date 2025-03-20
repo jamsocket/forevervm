@@ -2,52 +2,25 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ListPromptsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 import { ForeverVM } from '@forevervm/sdk'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import { Command } from 'commander'
-import { installForClaude } from './install/claude.js'
-import { installForWindsurf } from './install/windsurf.js'
-import { installForGoose } from './install/goose.js'
+import { installForeverVM } from './install/index.js'
 
 const DEFAULT_FOREVERVM_SERVER = 'https://api.forevervm.com'
 
 interface ForeverVMOptions {
   token?: string
   baseUrl?: string
-}
-
-function installForeverVM(options: { claude: boolean; windsurf: boolean; goose: boolean }) {
-  const forevervmOptions = getForeverVMOptions()
-
-  if (!forevervmOptions?.token) {
-    console.error(
-      'ForeverVM token not found. Please set up ForeverVM first by running `npx forevervm login` or `npx forevervm signup`.',
-    )
-    process.exit(1)
-  }
-
-  if (!options.claude && !options.windsurf && !options.goose) {
-    console.log(
-      'Select at least one MCP client to install. Available options: --claude, --windsurf, --goose',
-    )
-    process.exit(1)
-  }
-
-  if (options.claude) {
-    installForClaude()
-  }
-
-  if (options.goose) {
-    installForGoose()
-  }
-
-  if (options.windsurf) {
-    installForWindsurf()
-  }
 }
 
 // Zod schema
@@ -59,7 +32,7 @@ const ExecMachineSchema = z.object({
 const RUN_REPL_TOOL_NAME = 'run-python-in-repl'
 const CREATE_REPL_MACHINE_TOOL_NAME = 'create-python-repl'
 
-function getForeverVMOptions(): ForeverVMOptions | null {
+export function getForeverVMOptions(): ForeverVMOptions | null {
   if (process.env.FOREVERVM_TOKEN) {
     return {
       token: process.env.FOREVERVM_TOKEN,
@@ -83,9 +56,14 @@ function getForeverVMOptions(): ForeverVMOptions | null {
       process.exit(1)
     }
 
+    let baseUrl = config.server_url || DEFAULT_FOREVERVM_SERVER
+
+    // remove trailing slash
+    baseUrl = baseUrl.replace(/\/$/, '')
+
     return {
       token: config.token,
-      baseUrl: config.baseUrl || DEFAULT_FOREVERVM_SERVER,
+      baseUrl,
     }
   } catch (error) {
     console.error('Failed to read ForeverVM config file:', error)
@@ -111,7 +89,7 @@ async function makeExecReplRequest(
 
     const repl = await fvm.repl(replId)
 
-    const execResult = await repl.exec(pythonCode, { timeoutSeconds: 5 })
+    const execResult = await repl.exec(pythonCode)
 
     const output: string[] = []
     for await (const nextOutput of execResult.output) {
@@ -152,21 +130,25 @@ async function makeExecReplRequest(
       }
     }
   } catch (error: any) {
-    console.error(`Failed to execute code on the ForeverVM REPL: ${error} \n\nreplId: ${replId}`)
-    process.exit(1)
+    return {
+      error: `Failed to execute Python code: ${error}`,
+      output: '',
+      result: '',
+      replId: replId,
+    }
   }
 }
 
 async function makeCreateMachineRequest(forevervmOptions: ForeverVMOptions): Promise<string> {
   try {
+    console.error('using options', forevervmOptions)
     const fvm = new ForeverVM(forevervmOptions)
 
     const machine = await fvm.createMachine()
 
     return machine.machine_name
   } catch (error: any) {
-    console.error(`Failed to create ForeverVM machine: ${error}`)
-    process.exit(1)
+    throw new Error(`Failed to create ForeverVM machine: ${error}`)
   }
 }
 
@@ -181,8 +163,22 @@ async function runMCPServer() {
 
   const server = new Server(
     { name: 'forevervm', version: '1.0.0' },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {}, resources: {}, prompts: {} } },
   )
+
+  // List resources
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    return {
+      resources: [], // No resources currently available
+    }
+  })
+
+  // List prompts
+  server.setRequestHandler(ListPromptsRequestSchema, async () => {
+    return {
+      prompts: [], // No prompts currently available
+    }
+  })
 
   // List tools
   server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -264,7 +260,15 @@ async function runMCPServer() {
           ],
         }
       } else if (name === CREATE_REPL_MACHINE_TOOL_NAME) {
-        const replId = await makeCreateMachineRequest(forevervmOptions)
+        let replId
+        try {
+          replId = await makeCreateMachineRequest(forevervmOptions)
+        } catch (error) {
+          return {
+            content: [{ type: 'text', text: `Failed to create machine: ${error}` }],
+            isError: true,
+          }
+        }
         return {
           content: [
             {
