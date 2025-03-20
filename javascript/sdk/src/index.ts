@@ -96,7 +96,7 @@ export class ForeverVM {
         body: body ? JSON.stringify(body) : undefined,
       })
     } catch (error) {
-      throw new Error(`Failed to fetch: ${error}`)
+      throw new Error(`Failed to fetch: ${error.message}\n${error.stack}`)
     }
     if (!response.ok) {
       const text = await response.text().catch(() => 'Unknown error')
