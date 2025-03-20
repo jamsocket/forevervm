@@ -32,7 +32,7 @@ const ExecMachineSchema = z.object({
 const RUN_REPL_TOOL_NAME = 'run-python-in-repl'
 const CREATE_REPL_MACHINE_TOOL_NAME = 'create-python-repl'
 
-export function getForeverVMOptions(): ForeverVMOptions | null {
+export function getForeverVMOptions(): ForeverVMOptions {
   if (process.env.FOREVERVM_TOKEN) {
     return {
       token: process.env.FOREVERVM_TOKEN,
@@ -155,11 +155,6 @@ async function makeCreateMachineRequest(forevervmOptions: ForeverVMOptions): Pro
 // Start server
 async function runMCPServer() {
   const forevervmOptions = getForeverVMOptions()
-
-  if (!forevervmOptions) {
-    console.error('ForeverVM token not found. Please set up ForeverVM first.')
-    process.exit(1)
-  }
 
   const server = new Server(
     { name: 'forevervm', version: '1.0.0' },
