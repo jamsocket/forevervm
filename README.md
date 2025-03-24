@@ -5,7 +5,7 @@
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947?color=404eed&label=discord)](https://discord.gg/N5sEpsuhh9)
 
 | repo                                                | version                     |
-|-----------------------------------------------------|-----------------------------|
+|-----------------------------------------------------|------------------------------|
 | [cli](https://github.com/jamsocket/forevervm) | [![npm](https://img.shields.io/npm/v/forevervm)](https://www.npmjs.com/package/forevervm) |
 | [sdk](https://github.com/jamsocket/forevervm) | [![npm](https://img.shields.io/npm/v/@forevervm/sdk)](https://www.npmjs.com/package/@forevervm/sdk) |
 
@@ -104,5 +104,17 @@ const machineResponse = await fvm.createMachine({
 // List machines filtered by tags
 const productionMachines = await fvm.listMachines({
   tags: { env: 'production' }
+})
+```
+
+Memory Limits
+----------------
+
+You can create machines with memory limits by specifying the memory size in megabytes:
+
+```typescript
+// Create a machine with 512MB memory limit
+const machineResponse = await fvm.createMachine({
+  memory_mb: 512,
 })
 ```
