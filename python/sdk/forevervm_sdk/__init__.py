@@ -89,16 +89,20 @@ class ForeverVM:
     def whoami_async(self):
         return self._get_async("/v1/whoami", type=WhoamiResponse)
 
-    def create_machine(self, tags: dict[str, str] = None):
+    def create_machine(self, tags: dict[str, str] = None, memory_mb: int = None):
         request: CreateMachineRequest = {}
         if tags:
             request["tags"] = tags
+        if memory_mb is not None:
+            request["memory_mb"] = memory_mb
         return self._post("/v1/machine/new", type=CreateMachineResponse, data=request)
 
-    def create_machine_async(self, tags: dict[str, str] = None):
+    def create_machine_async(self, tags: dict[str, str] = None, memory_mb: int = None):
         request: CreateMachineRequest = {}
         if tags:
             request["tags"] = tags
+        if memory_mb is not None:
+            request["memory_mb"] = memory_mb
         return self._post_async(
             "/v1/machine/new", type=CreateMachineResponse, data=request
         )
