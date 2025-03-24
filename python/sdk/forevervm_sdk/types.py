@@ -11,6 +11,7 @@ class WhoamiResponse(TypedDict):
 
 class CreateMachineRequest(TypedDict, total=False):
     tags: Dict[str, str]
+    memory_mb: Optional[int]
 
 
 class CreateMachineResponse(TypedDict):
