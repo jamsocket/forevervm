@@ -40,7 +40,8 @@ export class ForeverVM {
   async #get(path: string) {
     const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
     return await response.json()
   }
@@ -48,33 +49,60 @@ export class ForeverVM {
   async *#getStream(path: string) {
     const response = await fetch(`${this.#baseUrl}${path}`, { headers: this.#headers })
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
 
     if (!response.body) return
 
     const decoder = new TextDecoderStream()
     const reader = response.body.pipeThrough(decoder).getReader()
+
+    // buffer JSON just in case an object is split across multiple stream chunks
+    let buffer = ''
+
     while (true) {
-      const { done, value = '' } = await reader.read()
+      let { done, value = '' } = await reader.read()
       if (done) return
 
-      const lines = value.split('\n').filter((line) => line.trim())
-      for (const line of lines) {
-        yield JSON.parse(line)
+      // loop until we've read all the data in this chunk
+      while (value) {
+        // find the next newline character
+        const newline = value.indexOf('\n')
+
+        // if there are no more newlines, add the remaining data to the buffer and break
+        if (newline === -1) {
+          buffer += value
+          break
+        }
+
+        // parse and yield the next line from the data
+        const line = value.slice(0, newline)
+        yield JSON.parse(buffer + line)
+
+        // remove the just-processed line from the value and reset the buffer
+        value = value.slice(newline + 1)
+        buffer = ''
       }
     }
   }
 
   async #post(path: string, body?: object) {
-    const response = await fetch(`${this.#baseUrl}${path}`, {
-      method: 'POST',
-      headers: { ...this.#headers, 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    })
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    let response
+    try {
+      response = await fetch(`${this.#baseUrl}${path}`, {
+        method: 'POST',
+        headers: { ...this.#headers, 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      })
+    } catch (error) {
+      throw new Error(`Failed to fetch: ${error}`)
     }
+    if (!response.ok) {
+      const text = await response.text().catch(() => 'Unknown error')
+      throw new Error(`HTTP ${response.status}: ${text}`)
+    }
+
     return await response.json()
   }
 
@@ -177,6 +205,24 @@ if (import.meta.vitest) {
         i += 1
       }
     }
+  })
+
+  test('execResultStream with image', { timeout: 10000 }, async () => {
+    const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+    const { machine_name } = await fvm.createMachine()
+
+    const code = `import matplotlib.pyplot as plt
+plt.plot([0, 1, 2], [0, 1, 2])
+plt.title('Simple Plot')
+plt.show()`
+
+    const { instruction_seq } = await fvm.exec(code, machine_name)
+    expect(instruction_seq).toBe(0)
+
+    for await (const _ of fvm.execResultStream(machine_name, instruction_seq as number)) {
+    }
+
+    // if we reach this point, it means all the stream chunks were valid JSON
   })
 
   test('createMachine with tags', async () => {

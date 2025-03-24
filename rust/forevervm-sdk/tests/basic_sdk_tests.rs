@@ -1,9 +1,11 @@
 use forevervm_sdk::api::api_types::Instruction;
 use forevervm_sdk::api::http_api::{CreateMachineRequest, ListMachinesRequest};
+use forevervm_sdk::api::protocol::MessageFromServer;
 use forevervm_sdk::{
     api::{api_types::ExecResultType, protocol::StandardOutputStream, token::ApiToken},
     client::ForeverVMClient,
 };
+use futures_util::StreamExt;
 use std::env;
 use url::Url;
 
@@ -83,6 +85,99 @@ async fn test_exec() {
             data: None
         }
     );
+}
+
+#[tokio::test]
+async fn test_exec_stream() {
+    let (api_base, token) = get_test_credentials();
+    let client = ForeverVMClient::new(api_base, token);
+
+    // Create machine and execute code
+    let machine = client
+        .create_machine(CreateMachineRequest::default())
+        .await
+        .expect("failed to create machine");
+    let code = "for i in range(10): print(i)\n'done'";
+
+    let result = client
+        .exec_instruction(
+            &machine.machine_name,
+            Instruction {
+                code: code.to_string(),
+                timeout_seconds: 10,
+            },
+        )
+        .await
+        .expect("exec failed");
+
+    let mut stream = client
+        .exec_result_stream(
+            &machine.machine_name,
+            result.instruction_seq.expect("instruction seq missing"),
+        )
+        .await
+        .expect("failed to get exec result");
+
+    let mut i = 0;
+    while let Some(msg) = stream.next().await {
+        match msg {
+            Ok(MessageFromServer::Output { chunk, .. }) => {
+                assert_eq!(chunk.data, format!("{}", i));
+                i += 1;
+            }
+            Ok(MessageFromServer::Result(chunk)) => {
+                assert_eq!(
+                    chunk.result.result,
+                    ExecResultType::Value {
+                        value: Some("'done'".to_string()),
+                        data: None
+                    }
+                );
+            }
+            _ => {
+                panic!("unexpected message");
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_exec_stream_image() {
+    let (api_base, token) = get_test_credentials();
+    let client = ForeverVMClient::new(api_base, token);
+
+    // Create machine and execute code
+    let machine = client
+        .create_machine(CreateMachineRequest::default())
+        .await
+        .expect("failed to create machine");
+    let code = "import matplotlib.pyplot as plt
+plt.plot([0, 1, 2], [0, 1, 2])
+plt.title('Simple Plot')
+plt.show()";
+
+    let result = client
+        .exec_instruction(
+            &machine.machine_name,
+            Instruction {
+                code: code.to_string(),
+                timeout_seconds: 10,
+            },
+        )
+        .await
+        .expect("exec failed");
+
+    let mut stream = client
+        .exec_result_stream(
+            &machine.machine_name,
+            result.instruction_seq.expect("instruction seq missing"),
+        )
+        .await
+        .expect("failed to get exec result");
+
+    while let Some(chunk) = stream.next().await {
+        assert!(chunk.is_ok(), "chunk should parse as JSON");
+    }
 }
 
 #[tokio::test]
