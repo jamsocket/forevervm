@@ -266,4 +266,20 @@ plt.show()`
     expect(filteredMachines.machines.length).toBe(1)
     expect(filteredMachines.machines[0].tags?.unique).toBe(uniqueTag)
   })
+
+  test('createMachine with memory limit', async () => {
+    const fvm = new ForeverVM({ token: FOREVERVM_TOKEN, baseUrl: FOREVERVM_API_BASE })
+
+    // Create machine with memory limit
+    const machine = await fvm.createMachine({
+      memory_mb: 512,
+    })
+    expect(machine.machine_name).toBeDefined()
+
+    // Verify the machine was created (note: we can't directly verify the memory limit
+    // through the API as it doesn't return this value in machine details)
+    const machines = await fvm.listMachines()
+    const found = machines.machines.find(({ name }) => name === machine.machine_name)
+    expect(found).toBeDefined()
+  })
 }
