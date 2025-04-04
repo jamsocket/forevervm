@@ -70,7 +70,7 @@ impl ConfigManager {
         config_str.push('\n');
         std::fs::write(&self.config_path, config_str).context("Failed to write config file")?;
 
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             let metadata = std::fs::metadata(&self.config_path)?;
