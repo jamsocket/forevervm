@@ -1,6 +1,6 @@
 {
   "name": "forevervm-mcp",
-  "version": "0.1.32",
+  "version": "0.1.35",
   "description": "",
   "main": "index.js",
   "type": "module",

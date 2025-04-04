@@ -69,6 +69,16 @@ impl ConfigManager {
             serde_json::to_string_pretty(config).context("Failed to serialize config")?;
         config_str.push('\n');
         std::fs::write(&self.config_path, config_str).context("Failed to write config file")?;
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let metadata = std::fs::metadata(&self.config_path)?;
+            let mut permissions = metadata.permissions();
+            permissions.set_mode(0o600); // Read/write for owner only
+            std::fs::set_permissions(&self.config_path, permissions)?;
+        }
+
         Ok(())
     }
 
