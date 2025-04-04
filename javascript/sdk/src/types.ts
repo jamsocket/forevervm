@@ -46,6 +46,10 @@ export interface WhoamiResponse {
 
 export interface CreateMachineRequest {
   tags?: Record<string, string>
+  /**
+   * Memory size in MB. If not specified, a default value will be used.
+   */
+  memory_mb?: number
 }
 
 export interface CreateMachineResponse {
