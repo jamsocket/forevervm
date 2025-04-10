@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import platform
 import sys
 import subprocess
 import gzip
@@ -11,9 +12,13 @@ import urllib.error
 from importlib.metadata import version
 
 
+sys_platform = sys.platform
+uname_machine = platform.uname().machine
+
+
 def get_suffix(os_type, os_arch):
     suffixes = {
-        ("win32", "x86_64"): "win-x64.exe.gz",
+        ("win32", "AMD64"): "win-x64.exe.gz",
         ("linux", "x86_64"): "linux-x64.gz",
         ("linux", "aarch64"): "linux-arm64.gz",
         ("darwin", "x86_64"): "macos-x64.gz",
@@ -52,7 +57,7 @@ def get_binary():
         Path.home()
         / ".cache"
         / "forevervm"
-        / f"{sys.platform}-{os.uname().machine}-{forevervm_version}"
+        / f"{sys_platform}-{uname_machine}-{forevervm_version}"
     )
     bindir.mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +65,7 @@ def get_binary():
     if binpath.exists():
         return str(binpath)
 
-    url = binary_url(forevervm_version, sys.platform, os.uname().machine)
+    url = binary_url(forevervm_version, sys_platform, uname_machine)
     download_file(url, binpath)
 
     return str(binpath)
